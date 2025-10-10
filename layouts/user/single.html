@@ -1,0 +1,113 @@
+{{ define "title" }}
+{{ .Title }} | {{ .Site.Title }}
+{{ end }}
+
+{{ define "main" }}
+<div class="container mx-auto px-4 py-8">
+    <!-- Welcome Message -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-2" id="welcome-message">Welcome to Your Dashboard</h1>
+        <p class="text-gray-600 dark:text-gray-400">Manage your datasets, reports, and apps</p>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Datasets Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Datasets</h2>
+                <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                </svg>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Manage your data collections</p>
+            <ul class="space-y-2">
+                {{ $userId := .Params.userId }}
+                {{ $userData := index .Site.Data.user $userId }}
+                {{ $datasets := index $userData "datasets" }}
+                {{ range $datasets }}
+                <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                    <div class="font-medium text-gray-900 dark:text-white">{{ .name }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ .format }} • {{ .volume }}</div>
+                </li>
+                {{ end }}
+            </ul>
+            <button class="mt-4 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">
+                View All Datasets
+            </button>
+        </div>
+
+        <!-- Reports Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Reports</h2>
+                <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">View and create reports</p>
+            <ul class="space-y-2">
+                <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                    <div class="font-medium text-gray-900 dark:text-white">Q4 Performance</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Generated: Oct 1, 2025</div>
+                </li>
+                <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                    <div class="font-medium text-gray-900 dark:text-white">Annual Summary</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Generated: Sep 15, 2025</div>
+                </li>
+                <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                    <div class="font-medium text-gray-900 dark:text-white">Monthly Insights</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Generated: Oct 5, 2025</div>
+                </li>
+            </ul>
+            <button class="mt-4 w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium">
+                View All Reports
+            </button>
+        </div>
+
+        <!-- Apps Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Apps</h2>
+                <svg class="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Access your applications</p>
+            <ul class="space-y-2">
+                <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                    <div class="font-medium text-gray-900 dark:text-white">Data Visualizer</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Analytics & Charts</div>
+                </li>
+                <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                    <div class="font-medium text-gray-900 dark:text-white">Cloud Manager</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Resource Management</div>
+                </li>
+                <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                    <div class="font-medium text-gray-900 dark:text-white">API Console</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Developer Tools</div>
+                </li>
+            </ul>
+            <button class="mt-4 w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-md font-medium">
+                View All Apps
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Update welcome message with user's full name
+    const userFullName = localStorage.getItem('userFullName');
+    const welcomeMessage = document.getElementById('welcome-message');
+
+    if (userFullName && welcomeMessage) {
+        welcomeMessage.textContent = `Hello ${userFullName}`;
+    }
+
+    // Redirect to home if not logged in
+    const userEmail = localStorage.getItem('userEmail');
+    if (!userEmail) {
+        window.location.href = '/';
+    }
+</script>
+{{ end }}

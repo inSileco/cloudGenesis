@@ -19,6 +19,10 @@
                     <button id="login-button" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
                         Login
                     </button>
+                    <span id="user-display" class="hidden text-gray-700 dark:text-gray-300 px-3 py-2 rounded-md text-sm font-medium"></span>
+                    <button id="logout-button" class="hidden text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium">
+                        Logout
+                    </button>
                 </div>
             </div>
 
@@ -91,6 +95,41 @@
 </div>
 
 <script>
+    // Check if user is logged in and update navbar
+    function updateNavbar() {
+        const userName = localStorage.getItem('userName');
+        const loginButton = document.getElementById('login-button');
+        const userDisplay = document.getElementById('user-display');
+        const logoutButton = document.getElementById('logout-button');
+
+        if (userName) {
+            loginButton?.classList.add('hidden');
+            if (userDisplay) {
+                userDisplay.textContent = userName;
+                userDisplay.classList.remove('hidden');
+            }
+            logoutButton?.classList.remove('hidden');
+        } else {
+            loginButton?.classList.remove('hidden');
+            userDisplay?.classList.add('hidden');
+            logoutButton?.classList.add('hidden');
+        }
+    }
+
+    // Logout function
+    function logout() {
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userFullName');
+        window.location.href = '/';
+    }
+
+    // Run on page load
+    updateNavbar();
+
+    // Logout button click handler
+    document.getElementById('logout-button')?.addEventListener('click', logout);
+
     // Mobile menu toggle
     document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
         const menu = document.getElementById('mobile-menu');
@@ -132,15 +171,51 @@
     loginForm?.addEventListener('submit', function(e) {
         e.preventDefault();
         const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-        // Simulate login success
-        loginMessage.textContent = `Welcome back! Logged in as ${email}`;
-        loginMessage.className = 'mt-4 p-3 rounded-md bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300';
-        loginMessage.classList.remove('hidden');
+        // User credentials database
+        const users = {
+            'mhb@fake.io': {
+                password: 'insilecloud',
+                userName: 'mhb',
+                fullName: 'Marie-Helene',
+                userId: 'mhb'
+            },
+            'kc@fake.io': {
+                password: 'insilecloud',
+                userName: 'kc',
+                fullName: 'Kevin',
+                userId: 'kc'
+            },
+            'sd@fake.io': {
+                password: 'insilecloud',
+                userName: 'sd',
+                fullName: 'Steve',
+                userId: 'sd'
+            }
+        };
 
-        // Close modal after 2 seconds
-        setTimeout(() => {
-            closeModalFunc();
-        }, 2000);
+        // Check credentials
+        const user = users[email];
+        if (user && password === user.password) {
+            // Store user info in localStorage
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('userName', user.userName);
+            localStorage.setItem('userFullName', user.fullName);
+            localStorage.setItem('userId', user.userId);
+
+            // Successful login - redirect to user page
+            window.location.href = `/user/${user.userId}`;
+        } else {
+            // Failed login
+            loginMessage.textContent = 'Invalid credentials. Please try again.';
+            loginMessage.className = 'mt-4 p-3 rounded-md bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300';
+            loginMessage.classList.remove('hidden');
+
+            // Hide error message after 3 seconds
+            setTimeout(() => {
+                loginMessage.classList.add('hidden');
+            }, 3000);
+        }
     });
 </script>

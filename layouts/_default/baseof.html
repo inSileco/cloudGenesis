@@ -17,8 +17,11 @@
     {{ end }}
     <link rel="stylesheet" href="{{ $css.RelPermalink }}">
 </head>
-<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col min-h-screen">
     {{ partial "navbar.html" . }}
-    {{ block "main" . }}{{ end }}
+    <main class="flex-grow">
+        {{ block "main" . }}{{ end }}
+    </main>
+    {{ partial "footer.html" . }}
 </body>
 </html>

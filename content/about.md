@@ -4,20 +4,6 @@ date: 2025-10-10
 draft: false
 ---
 
-# About inSileCloud
+## About inSileCloud
 
-Welcome to inSileCloud! We're exploring innovative cloud solutions and technologies.
-
-## Our Mission
-
-To provide cutting-edge cloud services and solutions that empower businesses and individuals.
-
-## What We Do
-
-- Cloud infrastructure design
-- Scalable solutions
-- Innovation in cloud computing
-
-## Get in Touch
-
-Interested in learning more? Feel free to reach out to us!
+inSilecloud is inSileco’s secure collaborative platform for data-driven projects. It lets our clients explore their datasets, interact with analytical apps, and follow their pipelines in real time — ensuring transparency, reproducibility, and scientific rigor from data to decision.
