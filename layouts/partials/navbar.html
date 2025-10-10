@@ -1,0 +1,146 @@
+<nav class="bg-white dark:bg-gray-800 shadow-md">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center">
+                <a href="/" class="flex items-center space-x-2">
+                    <img src="/logo.png" alt="{{ .Site.Title }}" class="h-6 w-auto">
+                    <span class="text-xl font-bold text-gray-900 dark:text-white">{{ .Site.Title }}</span>
+                </a>
+            </div>
+
+            <div class="hidden md:block">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
+                        Home
+                    </a>
+                    <a href="/about" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
+                        About
+                    </a>
+                    <button id="login-button" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
+                        Login
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button type="button" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400" id="mobile-menu-button">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="hidden md:hidden" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+            <a href="/" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 rounded-md text-base font-medium">
+                Home
+            </a>
+            <a href="/about" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 rounded-md text-base font-medium">
+                About
+            </a>
+            <button id="login-button-mobile" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 rounded-md text-base font-medium w-full text-left">
+                Login
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Login Modal -->
+<div id="login-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Login</h3>
+            <button id="close-modal" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form id="login-form" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Email
+                </label>
+                <input type="email" id="email" name="email" required
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Password
+                </label>
+                <input type="password" id="password" name="password" required
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+            </div>
+
+            <div class="flex items-center justify-between">
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Sign In
+                </button>
+            </div>
+        </form>
+
+        <div id="login-message" class="hidden mt-4 p-3 rounded-md"></div>
+    </div>
+</div>
+
+<script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+    });
+
+    // Modal functionality
+    const modal = document.getElementById('login-modal');
+    const loginButton = document.getElementById('login-button');
+    const loginButtonMobile = document.getElementById('login-button-mobile');
+    const closeModal = document.getElementById('close-modal');
+    const loginForm = document.getElementById('login-form');
+    const loginMessage = document.getElementById('login-message');
+
+    // Open modal
+    function openModal() {
+        modal.classList.remove('hidden');
+    }
+
+    // Close modal
+    function closeModalFunc() {
+        modal.classList.add('hidden');
+        loginForm.reset();
+        loginMessage.classList.add('hidden');
+    }
+
+    loginButton?.addEventListener('click', openModal);
+    loginButtonMobile?.addEventListener('click', openModal);
+    closeModal?.addEventListener('click', closeModalFunc);
+
+    // Close modal when clicking outside
+    modal?.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModalFunc();
+        }
+    });
+
+    // Mock login
+    loginForm?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+
+        // Simulate login success
+        loginMessage.textContent = `Welcome back! Logged in as ${email}`;
+        loginMessage.className = 'mt-4 p-3 rounded-md bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300';
+        loginMessage.classList.remove('hidden');
+
+        // Close modal after 2 seconds
+        setTimeout(() => {
+            closeModalFunc();
+        }, 2000);
+    });
+</script>

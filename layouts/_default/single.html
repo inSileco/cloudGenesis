@@ -1,0 +1,17 @@
+{{ define "title" }}
+{{ .Title }} | {{ .Site.Title }}
+{{ end }}
+
+{{ define "main" }}
+<article class="container mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-4xl font-bold mb-4">{{ .Title }}</h1>
+
+    <div class="text-gray-600 dark:text-gray-400 mb-8">
+        {{ .Date.Format "January 2, 2006" }}
+    </div>
+
+    <div class="prose dark:prose-invert max-w-none">
+        {{ .Content }}
+    </div>
+</article>
+{{ end }}
