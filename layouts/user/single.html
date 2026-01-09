@@ -47,18 +47,16 @@
             </div>
             <p class="text-gray-600 dark:text-gray-400 mb-4">View and create reports</p>
             <ul class="space-y-2">
-                <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
-                    <div class="font-medium text-gray-900 dark:text-white">Q4 Performance</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Generated: Oct 1, 2025</div>
+                {{ $reports := index $userData "reports" }}
+                {{ range first 3 $reports }}
+                <li>
+                    <a href="/user/{{ $userId }}/reports/{{ .id }}"
+                       class="block p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer transition-colors">
+                        <div class="font-medium text-gray-900 dark:text-white">{{ .name }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Generated: {{ .generated_date }}</div>
+                    </a>
                 </li>
-                <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
-                    <div class="font-medium text-gray-900 dark:text-white">Annual Summary</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Generated: Sep 15, 2025</div>
-                </li>
-                <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
-                    <div class="font-medium text-gray-900 dark:text-white">Monthly Insights</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Generated: Oct 5, 2025</div>
-                </li>
+                {{ end }}
             </ul>
             <button class="mt-4 w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium">
                 View All Reports
@@ -76,7 +74,7 @@
             <p class="text-gray-600 dark:text-gray-400 mb-4">Access your applications</p>
             <ul class="space-y-2">
                 <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
-                    <div class="font-medium text-gray-900 dark:text-white">Data Visualizer</div>
+                    <a href="https://apps.insileco.io/nunatsiavutbirdtracker/"><div class="font-medium text-gray-900 dark:text-white">Bird Tracker</div></a>
                     <div class="text-sm text-gray-500 dark:text-gray-400">Analytics & Charts</div>
                 </li>
                 <li class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
