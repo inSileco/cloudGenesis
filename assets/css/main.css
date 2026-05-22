@@ -207,6 +207,22 @@
     color: #b6ecc1;
     background-color: rgba(36, 91, 47, 0.35);
   }
+  .pill-warning {
+    color: #7a4a05;
+    background-color: rgba(255, 224, 138, 0.45);
+  }
+  .dark .pill-warning {
+    color: #ffe08a;
+    background-color: rgba(120, 80, 8, 0.40);
+  }
+  .pill-error {
+    color: #7f1d1d;
+    background-color: rgba(254, 226, 226, 0.92);
+  }
+  .dark .pill-error {
+    color: #fca5a5;
+    background-color: rgba(127, 29, 29, 0.35);
+  }
 
   .nav-link {
     position: relative;

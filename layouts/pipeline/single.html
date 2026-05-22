@@ -1,0 +1,233 @@
+{{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
+
+{{ define "main" }}
+{{ $userId := .Params.userId }}
+{{ $projectId := .Params.projectId }}
+{{ $pipelineId := .Params.pipelineId }}
+{{ $project := index .Site.Data.projects $projectId }}
+{{ $filteredPipelines := where $project.pipelines "id" $pipelineId }}
+{{ $pipeline := index $filteredPipelines 0 }}
+{{ $status := $pipeline.last_execution.status }}
+
+<div class="container mx-auto px-4 py-10 max-w-5xl">
+    <div class="mb-6 flex items-center gap-2 text-sm">
+        <a href="/user/{{ $userId }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">Projects</a>
+        <span class="text-muted">/</span>
+        <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            {{ $project.name }}
+        </a>
+    </div>
+
+    <div class="surface-card p-8 mb-6">
+        <div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+                <div class="kicker mb-2">Pipeline</div>
+                <h1 class="text-4xl mb-2">{{ $pipeline.name }}</h1>
+                <div class="accent-rule mb-4"></div>
+                <p class="text-lg text-muted">{{ $pipeline.description }}</p>
+
+                <div class="flex flex-wrap items-center gap-2 mt-5">
+                    <span class="pill pill-brand">{{ $pipeline.schedule }}</span>
+                    <span class="pill
+                        {{ if eq $status "success" }}pill-success
+                        {{ else if eq $status "failed" }}pill-error
+                        {{ else if eq $status "warning" }}pill-warning
+                        {{ else }}pill-brand{{ end }}">last run: {{ $status }}</span>
+                </div>
+            </div>
+            <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent flex-shrink-0">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/><circle cx="18" cy="18" r="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+        </div>
+
+        <div class="flex flex-wrap gap-3 mt-6">
+            <button id="play-pipeline" onclick="playPipeline()" class="btn-accent">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                Play pipeline
+            </button>
+            <button class="btn-primary">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Schedule
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="surface-card p-6">
+                <div class="kicker mb-2">Workflow</div>
+                <h2 class="text-2xl mb-4">Steps</h2>
+                <ol class="relative border-l-2 border-[var(--color-surface-border)] dark:border-white/10 ml-3 space-y-5 pl-6">
+                    {{ range $idx, $step := $pipeline.steps }}
+                    <li class="relative">
+                        <span class="absolute -left-[34px] flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent text-xs font-bold ring-4 ring-white dark:ring-[#0f172a]">{{ add $idx 1 }}</span>
+                        <div class="surface-soft p-4">
+                            <div class="flex items-center justify-between gap-3 mb-1">
+                                <h3 class="font-semibold text-base">{{ $step.name }}</h3>
+                                <span class="text-xs text-muted whitespace-nowrap">avg {{ $step.avg_duration }}</span>
+                            </div>
+                            <p class="text-sm text-muted">{{ $step.description }}</p>
+                        </div>
+                    </li>
+                    {{ end }}
+                </ol>
+            </div>
+
+            {{ if $pipeline.recent_runs }}
+            <div class="surface-card p-6">
+                <div class="kicker mb-2">History</div>
+                <h2 class="text-2xl mb-4">Recent runs</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-[var(--color-surface-border)] dark:border-white/10">
+                                <th class="py-2 pr-4">Date</th>
+                                <th class="py-2 pr-4">Status</th>
+                                <th class="py-2">Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ range $pipeline.recent_runs }}
+                            <tr class="border-b border-[var(--color-surface-border)]/60 dark:border-white/5">
+                                <td class="py-2 pr-4 font-medium">{{ .date }}</td>
+                                <td class="py-2 pr-4">
+                                    <span class="pill
+                                        {{ if eq .status "success" }}pill-success
+                                        {{ else if eq .status "failed" }}pill-error
+                                        {{ else if eq .status "warning" }}pill-warning
+                                        {{ else }}pill-brand{{ end }}">{{ .status }}</span>
+                                </td>
+                                <td class="py-2">{{ .duration }}</td>
+                            </tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+
+        <div class="space-y-6">
+            <div class="surface-card p-6">
+                <div class="kicker mb-2">Last execution</div>
+                <h2 class="text-xl mb-4">Latest run</h2>
+                <dl class="space-y-3">
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Date</dt>
+                        <dd class="mt-1">{{ $pipeline.last_execution.date }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Status</dt>
+                        <dd class="mt-1">
+                            <span class="pill
+                                {{ if eq $status "success" }}pill-success
+                                {{ else if eq $status "failed" }}pill-error
+                                {{ else if eq $status "warning" }}pill-warning
+                                {{ else }}pill-brand{{ end }}">{{ $status }}</span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Duration</dt>
+                        <dd class="mt-1">{{ $pipeline.last_execution.duration }}</dd>
+                    </div>
+                    {{ with $pipeline.last_execution.records_processed }}
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Records processed</dt>
+                        <dd class="mt-1">{{ . }}</dd>
+                    </div>
+                    {{ end }}
+                </dl>
+            </div>
+
+            <div class="surface-card p-6">
+                <div class="kicker mb-2">Stats</div>
+                <h2 class="text-xl mb-4">Overall</h2>
+                <dl class="space-y-3">
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Schedule</dt>
+                        <dd class="mt-1">{{ $pipeline.schedule }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Total runs</dt>
+                        <dd class="mt-1">{{ $pipeline.runs_count }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Average duration</dt>
+                        <dd class="mt-1">{{ $pipeline.avg_duration }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Steps</dt>
+                        <dd class="mt-1">{{ len $pipeline.steps }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="notification-container" class="fixed top-4 right-4 z-50"></div>
+
+<script>
+const NotificationManager = {
+    show(message, type = 'info', duration = 3000) {
+        const container = document.getElementById('notification-container');
+        const notification = document.createElement('div');
+        notification.className = `notification transform transition-all duration-300 ease-in-out mb-4 p-4 rounded-xl shadow-lg flex items-center gap-3 max-w-md ${this.getTypeClasses(type)}`;
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(400px)';
+        notification.innerHTML = `
+            ${this.getIcon(type)}
+            <span class="font-medium">${message}</span>
+            <button class="ml-auto opacity-80 hover:opacity-100" onclick="this.parentElement.remove()" aria-label="Close">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>`;
+        container.appendChild(notification);
+        setTimeout(() => { notification.style.opacity = '1'; notification.style.transform = 'translateX(0)'; }, 10);
+        if (duration > 0) {
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
+        }
+        return notification;
+    },
+    getTypeClasses(type) {
+        return ({
+            info:    'bg-brand-500 text-white',
+            success: 'bg-emerald-600 text-white',
+            warning: 'bg-amber-500 text-ink-900',
+            error:   'bg-red-600 text-white',
+            loading: 'bg-ink-800 text-white'
+        })[type] || 'bg-brand-500 text-white';
+    },
+    getIcon(type) {
+        const icons = {
+            info:    '<svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            success: '<svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            warning: '<svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>',
+            error:   '<svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            loading: '<svg class="animate-spin h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
+        };
+        return icons[type] || icons.info;
+    }
+};
+
+function playPipeline() {
+    const button = document.getElementById('play-pipeline');
+    button.disabled = true;
+    button.classList.add('opacity-75', 'cursor-not-allowed');
+    const loading = NotificationManager.show('Pipeline queued — running…', 'loading', 0);
+    setTimeout(() => {
+        loading.remove();
+        NotificationManager.show('Pipeline finished successfully.', 'success', 4000);
+        button.disabled = false;
+        button.classList.remove('opacity-75', 'cursor-not-allowed');
+    }, 2200);
+}
+
+const userEmail = localStorage.getItem('userEmail');
+if (!userEmail) window.location.href = '/';
+</script>
+{{ end }}
