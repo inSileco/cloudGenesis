@@ -1,0 +1,12 @@
+kc:
+  fullName: "Kevin Cazelles"
+  initials: "KC"
+  role: "Lead scientist"
+mhb:
+  fullName: "Marie-Hélène Brice"
+  initials: "MHB"
+  role: "Ecologist"
+sd:
+  fullName: "Steve Vissault"
+  initials: "SV"
+  role: "Data engineer"

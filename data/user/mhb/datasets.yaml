@@ -1,8 +1,0 @@
-- name: "Micro foret 1"
-  format: "csv"
-  volume: "5Mb"
-  link: "mhb/microforet1.csv"
-- name: "Micro foret 2"
-  format: "csv"
-  volume: "4Mb"
-  link: "mhb/microforet2.csv"

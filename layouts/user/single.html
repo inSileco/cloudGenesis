@@ -1,97 +1,70 @@
 {{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
 
 {{ define "main" }}
+{{ $userId := .Params.userId }}
+{{ $users := .Site.Data.users }}
+{{ $userMeta := index $users $userId }}
+
 <div class="container mx-auto px-4 py-10">
     <div class="mb-10">
-        <div class="kicker mb-2">Dashboard</div>
-        <h1 class="text-4xl md:text-5xl mb-2" id="welcome-message">Welcome to your dashboard</h1>
+        <div class="kicker mb-2">Workspace</div>
+        <h1 class="text-4xl md:text-5xl mb-2" id="welcome-message">Welcome to your workspace</h1>
         <div class="accent-rule mb-4"></div>
-        <p class="text-muted">Manage your datasets, reports, and apps.</p>
+        <p class="text-muted">Pick a project to access its datasets, reports and apps.</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Datasets -->
-        <section class="surface-card p-6">
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <div class="kicker">01 — Data</div>
-                    <h2 class="text-2xl mt-1">Datasets</h2>
-                </div>
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
-                </span>
-            </div>
-            <p class="text-sm text-muted mb-4">Your data collections.</p>
-            <ul class="space-y-2">
-                {{ $userId := .Params.userId }}
-                {{ $userData := index .Site.Data.user $userId }}
-                {{ $datasets := index $userData "datasets" }}
-                {{ range $datasets }}
-                <li class="surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors cursor-pointer">
-                    <div class="font-medium">{{ .name }}</div>
-                    <div class="text-sm text-muted">{{ .format }} • {{ .volume }}</div>
-                </li>
-                {{ end }}
-            </ul>
-            <button class="btn-primary w-full mt-5">View all datasets</button>
-        </section>
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl">Your projects</h2>
+        <span class="text-sm text-muted" id="project-count"></span>
+    </div>
 
-        <!-- Reports -->
-        <section class="surface-card p-6">
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <div class="kicker">02 — Insight</div>
-                    <h2 class="text-2xl mt-1">Reports</h2>
-                </div>
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                </span>
-            </div>
-            <p class="text-sm text-muted mb-4">View and create reports.</p>
-            <ul class="space-y-2">
-                {{ $reports := index $userData "reports" }}
-                {{ range first 3 $reports }}
-                <li>
-                    <a href="/user/{{ $userId }}/reports/{{ .id }}" class="block surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors">
-                        <div class="font-medium">{{ .name }}</div>
-                        <div class="text-sm text-muted">Generated: {{ .generated_date }}</div>
-                    </a>
-                </li>
-                {{ end }}
-            </ul>
-            <button class="btn-primary w-full mt-5">View all reports</button>
-        </section>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="project-grid">
+        {{ $hasProject := false }}
+        {{ range $projectId, $project := .Site.Data.projects }}
+            {{ if in $project.members $userId }}
+                {{ $hasProject = true }}
+                {{ $datasetCount := len $project.datasets }}
+                {{ $reportCount := len $project.reports }}
+                {{ $appCount := len $project.apps }}
+                {{ $memberCount := len $project.members }}
+                <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <div class="kicker">Project</div>
+                            <h3 class="text-xl mt-1 group-hover:text-brand-500 dark:group-hover:text-accent transition-colors">{{ $project.name }}</h3>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+                        </span>
+                    </div>
+                    <p class="text-sm text-muted mb-4 line-clamp-2">{{ $project.short_description }}</p>
 
-        <!-- Apps -->
-        <section class="surface-card p-6">
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <div class="kicker">03 — Decision</div>
-                    <h2 class="text-2xl mt-1">Apps</h2>
-                </div>
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
-                </span>
-            </div>
-            <p class="text-sm text-muted mb-4">Access your applications.</p>
-            <ul class="space-y-2">
-                <li class="surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors">
-                    <a href="https://apps.insileco.io/nunatsiavutbirdtracker/" class="block">
-                        <div class="font-medium">Bird Tracker</div>
-                        <div class="text-sm text-muted">Analytics &amp; charts</div>
-                    </a>
-                </li>
-                <li class="surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors cursor-pointer">
-                    <div class="font-medium">Cloud Manager</div>
-                    <div class="text-sm text-muted">Resource management</div>
-                </li>
-                <li class="surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors cursor-pointer">
-                    <div class="font-medium">API Console</div>
-                    <div class="text-sm text-muted">Developer tools</div>
-                </li>
-            </ul>
-            <button class="btn-primary w-full mt-5">View all apps</button>
-        </section>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="pill pill-brand">{{ $datasetCount }} datasets</span>
+                        <span class="pill pill-brand">{{ $reportCount }} reports</span>
+                        <span class="pill pill-brand">{{ $appCount }} apps</span>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-3 border-t border-[var(--color-surface-border)] dark:border-white/10">
+                        <div class="flex -space-x-2">
+                            {{ range $project.members }}
+                                {{ $member := index $users . }}
+                                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent text-xs font-semibold ring-2 ring-white dark:ring-[#0f172a]" title="{{ $member.fullName }}">{{ $member.initials }}</span>
+                            {{ end }}
+                        </div>
+                        <span class="text-xs text-muted">{{ $memberCount }} member{{ if ne $memberCount 1 }}s{{ end }}</span>
+                    </div>
+                </a>
+            {{ end }}
+        {{ end }}
+
+        {{ if not $hasProject }}
+        <div class="md:col-span-2 lg:col-span-3 surface-card p-10 text-center">
+            <div class="kicker mb-2">Empty workspace</div>
+            <h3 class="text-xl mb-2">No projects yet</h3>
+            <p class="text-muted">You are not a member of any project. Ask an administrator to add you to one.</p>
+        </div>
+        {{ end }}
     </div>
 </div>
 
@@ -103,5 +76,10 @@
     }
     const userEmail = localStorage.getItem('userEmail');
     if (!userEmail) window.location.href = '/';
+
+    const grid = document.getElementById('project-grid');
+    const count = grid?.querySelectorAll('a').length || 0;
+    const countEl = document.getElementById('project-count');
+    if (countEl) countEl.textContent = count + ' active';
 </script>
 {{ end }}
