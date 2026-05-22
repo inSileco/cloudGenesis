@@ -1,17 +1,16 @@
-{{ define "title" }}
-{{ .Title }} | {{ .Site.Title }}
-{{ end }}
+{{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
 
 {{ define "main" }}
-<article class="container mx-auto px-4 py-8 max-w-4xl">
-    <h1 class="text-4xl font-bold mb-4">{{ .Title }}</h1>
+<article class="container mx-auto px-4 py-10 max-w-3xl">
+    <div class="kicker mb-2">Article</div>
+    <h1 class="text-4xl md:text-5xl mb-3">{{ .Title }}</h1>
+    <div class="accent-rule mb-4"></div>
+    <div class="text-sm text-muted mb-8">{{ .Date.Format "January 2, 2006" }}</div>
 
-    <div class="text-gray-600 dark:text-gray-400 mb-8">
-        {{ .Date.Format "January 2, 2006" }}
-    </div>
-
-    <div class="prose dark:prose-invert max-w-none">
-        {{ .Content }}
+    <div class="surface-card p-8">
+        <div class="prose dark:prose-invert max-w-none">
+            {{ .Content }}
+        </div>
     </div>
 </article>
 {{ end }}

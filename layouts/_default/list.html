@@ -1,20 +1,18 @@
-{{ define "title" }}
-{{ .Title }} | {{ .Site.Title }}
-{{ end }}
+{{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
 
 {{ define "main" }}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold mb-8">{{ .Title }}</h1>
+<div class="container mx-auto px-4 py-10 max-w-4xl">
+    <div class="kicker mb-2">Index</div>
+    <h1 class="text-4xl mb-3">{{ .Title }}</h1>
+    <div class="accent-rule mb-8"></div>
 
     <div class="space-y-4">
         {{ range .Pages }}
-        <article class="border-b border-gray-200 dark:border-gray-700 pb-4">
-            <h2 class="text-2xl font-semibold mb-2">
-                <a href="{{ .RelPermalink }}" class="hover:text-blue-600 dark:hover:text-blue-400">
-                    {{ .Title }}
-                </a>
+        <article class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors">
+            <h2 class="text-2xl mb-2">
+                <a href="{{ .RelPermalink }}" class="hover:text-brand-500 dark:hover:text-accent">{{ .Title }}</a>
             </h2>
-            <p class="text-gray-600 dark:text-gray-400">{{ .Summary }}</p>
+            <p class="text-muted">{{ .Summary }}</p>
         </article>
         {{ end }}
     </div>

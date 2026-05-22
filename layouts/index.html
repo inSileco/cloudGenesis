@@ -1,13 +1,63 @@
-{{ define "title" }}
-{{ .Site.Title }}
-{{ end }}
+{{ define "title" }}{{ .Site.Title }}{{ end }}
 
 {{ define "main" }}
-<div class="min-h-screen flex items-center justify-center">
-    <div class="text-center">
-        <img src="/logo.png" alt="{{ .Site.Title }}" class="h-48 w-auto mx-auto mb-8">
-        <h1 class="text-6xl font-bold mb-4">{{ .Site.Title }}</h1>
-        <p class="text-xl text-gray-600 dark:text-gray-400">{{ .Site.Params.description }}</p>
+<section class="relative overflow-hidden">
+    <div class="container mx-auto px-4 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
+        <div>
+            <div class="kicker mb-4">Cloud platform · inSileco</div>
+            <h1 class="text-5xl md:text-6xl leading-tight mb-6">
+                Your data,<br>
+                <span class="text-brand-500 dark:text-accent">your apps</span>,<br>
+                one workspace.
+            </h1>
+            <div class="accent-rule mb-6"></div>
+            <p class="text-lg text-ink-500 dark:text-slate-300 mb-8 max-w-xl">
+                {{ .Site.Params.description }}. Reproducible analytics — from ecology to operations.
+            </p>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="document.getElementById('login-button').click()" class="btn-primary">
+                    Get started
+                </button>
+                <a href="/about" class="btn-ghost">Learn more</a>
+            </div>
+        </div>
+
+        <div class="relative">
+            <div class="surface-card p-8 md:p-10 relative">
+                <div class="absolute -top-3 -left-3 w-20 h-20 rounded-full bg-brand-400/15 blur-2xl"></div>
+                <div class="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-accent/20 blur-2xl"></div>
+                <div class="kicker mb-3">What you get</div>
+                <ul class="space-y-4">
+                    <li class="flex items-start gap-3">
+                        <span class="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        </span>
+                        <div>
+                            <div class="font-semibold">Datasets</div>
+                            <div class="text-sm text-muted">Organise and version your data collections.</div>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        </span>
+                        <div>
+                            <div class="font-semibold">Reports</div>
+                            <div class="text-sm text-muted">Generate and share reproducible analyses.</div>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        </span>
+                        <div>
+                            <div class="font-semibold">Apps</div>
+                            <div class="text-sm text-muted">Launch interactive tools from one place.</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
-</div>
+</section>
 {{ end }}
