@@ -3,6 +3,11 @@ short_description: "Atlantic climate and ocean monitoring"
 description: "Integrated climate modelling and ocean monitoring across the Atlantic basin, combining satellite, in-situ and reanalysis data to track temperature, currents and weather trends."
 created: "2024-02-19"
 location: "North Atlantic basin"
+last_activity: "30 minutes ago"
+usage:
+  storage_gb: 184.2
+  compute_hours_month: 142.6
+  monthly_cost: 312
 members:
   - sd
 datasets:

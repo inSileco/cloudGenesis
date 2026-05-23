@@ -1,0 +1,393 @@
+{{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
+
+{{ define "main" }}
+{{ $userId := .Params.userId }}
+{{ $users := .Site.Data.users }}
+{{ $user := index $users $userId }}
+{{ $projects := .Site.Data.projects }}
+
+{{/* --- Aggregate user-scoped stats --- */}}
+{{ $userProjects := dict }}
+{{ $storageUsed := 0.0 }}
+{{ $computeUsed := 0.0 }}
+{{ $monthlyCost := 0.0 }}
+{{ $teammates := slice }}
+{{ $events := slice }}
+{{ range $projectId, $project := $projects }}
+    {{ if in $project.members $userId }}
+        {{ $userProjects = merge $userProjects (dict $projectId $project) }}
+        {{ with $project.usage }}
+            {{ $storageUsed = add $storageUsed (.storage_gb | float) }}
+            {{ $computeUsed = add $computeUsed (.compute_hours_month | float) }}
+            {{ $monthlyCost = add $monthlyCost (.monthly_cost | float) }}
+        {{ end }}
+        {{ range $project.members }}
+            {{ if ne . $userId }}
+                {{ $teammates = $teammates | append . }}
+            {{ end }}
+        {{ end }}
+        {{ range $project.pipelines }}
+            {{ $pipeline := . }}
+            {{ range .recent_runs }}
+                {{ $events = $events | append (dict
+                    "kind" "pipeline"
+                    "title" (printf "Pipeline %s — %s" $pipeline.name .status)
+                    "subtitle" $project.name
+                    "date" .date
+                    "status" .status
+                    "url" (printf "/user/%s/project/%s/pipelines/%s/" $userId $projectId $pipeline.id)
+                ) }}
+            {{ end }}
+        {{ end }}
+        {{ range $project.reports }}
+            {{ $events = $events | append (dict
+                "kind" "report"
+                "title" (printf "Report %q generated" .name)
+                "subtitle" $project.name
+                "date" .generated_date
+                "status" .status
+                "url" (printf "/user/%s/project/%s/reports/%s/" $userId $projectId .id)
+            ) }}
+        {{ end }}
+    {{ end }}
+{{ end }}
+{{ $teammates = $teammates | uniq }}
+{{ $events = sort $events "date" "desc" }}
+
+{{ $storageQuota := $user.quotas.storage_gb | float }}
+{{ $computeQuota := $user.quotas.compute_hours | float }}
+{{ $storagePct := 0 }}
+{{ if gt $storageQuota 0.0 }}{{ $storagePct = mul (div $storageUsed $storageQuota) 100 }}{{ end }}
+{{ $computePct := 0 }}
+{{ if gt $computeQuota 0.0 }}{{ $computePct = mul (div $computeUsed $computeQuota) 100 }}{{ end }}
+
+<div class="container mx-auto px-4 py-10 max-w-7xl">
+    <div class="mb-6">
+        <a href="/user/{{ $userId }}" class="inline-flex items-center gap-2 text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to projects
+        </a>
+    </div>
+
+    <div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+            <div class="kicker mb-2">Back office</div>
+            <h1 class="text-4xl md:text-5xl mb-2">Account control panel</h1>
+            <div class="accent-rule mb-4"></div>
+            <p class="text-muted">Manage your organization, team and usage.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <span class="pill pill-brand">{{ $user.plan }} plan</span>
+            <span class="pill pill-success">all systems normal</span>
+        </div>
+    </div>
+
+    <!-- KPI tiles -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="kpi-card">
+            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">Active projects</div>
+            <div class="text-3xl font-bold">{{ len $userProjects }}</div>
+            <div class="text-xs text-muted mt-1">all owned by your team</div>
+        </div>
+        <div class="kpi-card">
+            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">Collaborators</div>
+            <div class="text-3xl font-bold">{{ len $teammates }}</div>
+            <div class="text-xs text-muted mt-1">{{ $user.quotas.seats }} seats included</div>
+        </div>
+        <div class="kpi-card">
+            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">Storage</div>
+            <div class="text-3xl font-bold">{{ printf "%.1f" $storageUsed }} <span class="text-base font-medium text-muted">/ {{ $storageQuota }} GB</span></div>
+            <div class="progress mt-2 {{ if gt $storagePct 85.0 }}danger{{ else if gt $storagePct 70.0 }}warn{{ end }}">
+                <div class="bar" style="width: {{ printf "%.0f" $storagePct }}%"></div>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">Compute this month</div>
+            <div class="text-3xl font-bold">{{ printf "%.1f" $computeUsed }} <span class="text-base font-medium text-muted">/ {{ $computeQuota }} h</span></div>
+            <div class="progress mt-2 {{ if gt $computePct 85.0 }}danger{{ else if gt $computePct 70.0 }}warn{{ end }}">
+                <div class="bar" style="width: {{ printf "%.0f" $computePct }}%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Recent activity -->
+        <div class="lg:col-span-2 surface-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div class="kicker">Activity</div>
+                    <h2 class="text-2xl mt-1">Recent activity</h2>
+                </div>
+                <span class="text-xs text-muted">{{ len $events }} events</span>
+            </div>
+            <ol class="relative border-l-2 border-[var(--color-surface-border)] dark:border-white/10 ml-3 space-y-4 pl-6">
+                {{ range first 8 $events }}
+                <li class="relative">
+                    <span class="absolute -left-[34px] flex h-7 w-7 items-center justify-center rounded-full
+                        {{ if eq .kind "pipeline" }}bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent{{ else }}bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300{{ end }}
+                        ring-4 ring-white dark:ring-[#0f172a]">
+                        {{ if eq .kind "pipeline" }}
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                        {{ else }}
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        {{ end }}
+                    </span>
+                    <a href="{{ .url }}" class="block surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="font-medium truncate">{{ .title }}</div>
+                                <div class="text-xs text-muted">{{ .subtitle }} · {{ .date }}</div>
+                            </div>
+                            <span class="pill flex-shrink-0
+                                {{ if eq .status "success" }}pill-success
+                                {{ else if eq .status "failed" }}pill-error
+                                {{ else if eq .status "warning" }}pill-warning
+                                {{ else if eq .status "published" }}pill-success
+                                {{ else if eq .status "draft" }}pill-warning
+                                {{ else }}pill-brand{{ end }}">{{ .status }}</span>
+                        </div>
+                    </a>
+                </li>
+                {{ end }}
+            </ol>
+        </div>
+
+        <!-- Plan & billing + System status -->
+        <div class="space-y-6">
+            <div class="surface-card p-6">
+                <div class="kicker mb-2">Billing</div>
+                <h2 class="text-xl mb-4">Plan</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-muted">Plan</span>
+                        <span class="font-semibold">{{ $user.plan }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-muted">Seats</span>
+                        <span class="font-semibold">{{ add (len $teammates) 1 }} / {{ $user.quotas.seats }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-muted">Monthly</span>
+                        <span class="font-semibold">${{ $user.cost_monthly }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-muted">Next invoice</span>
+                        <span class="font-semibold">{{ $user.next_invoice }}</span>
+                    </div>
+                </div>
+                <button class="btn-primary w-full mt-5" onclick="notify('Billing portal would open here.', 'info');">Manage billing</button>
+            </div>
+
+            <div class="surface-card p-6">
+                <div class="kicker mb-2">Status</div>
+                <h2 class="text-xl mb-4">System health</h2>
+                <ul class="space-y-3 text-sm">
+                    {{ range slice (dict "name" "Cloud storage" "status" "ok") (dict "name" "Pipelines" "status" "ok") (dict "name" "API" "status" "ok") (dict "name" "Reports" "status" "warn" "note" "elevated latency") (dict "name" "Apps" "status" "ok") }}
+                    <li class="flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <span class="status-dot {{ .status }}"></span>
+                            {{ .name }}
+                        </span>
+                        <span class="text-xs {{ if eq .status "ok" }}text-emerald-600 dark:text-emerald-400{{ else if eq .status "warn" }}text-amber-600 dark:text-amber-400{{ else }}text-red-600 dark:text-red-400{{ end }}">
+                            {{ if eq .status "ok" }}operational{{ else if eq .status "warn" }}{{ .note }}{{ else }}down{{ end }}
+                        </span>
+                    </li>
+                    {{ end }}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects management -->
+    <div class="surface-card p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <div class="kicker">Projects</div>
+                <h2 class="text-2xl mt-1">Managed projects</h2>
+            </div>
+            <button class="btn-primary" onclick="notify('Project wizard would open here.', 'info');">+ New project</button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-[var(--color-surface-border)] dark:border-white/10">
+                        <th class="py-2 pr-4">Project</th>
+                        <th class="py-2 pr-4">Members</th>
+                        <th class="py-2 pr-4">Datasets</th>
+                        <th class="py-2 pr-4">Storage</th>
+                        <th class="py-2 pr-4">Last activity</th>
+                        <th class="py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range $projectId, $project := $userProjects }}
+                    <tr class="border-b border-[var(--color-surface-border)]/60 dark:border-white/5">
+                        <td class="py-3 pr-4">
+                            <a href="/user/{{ $userId }}/project/{{ $projectId }}/" class="font-medium hover:text-brand-500 dark:hover:text-accent">{{ $project.name }}</a>
+                            <div class="text-xs text-muted">{{ $project.short_description }}</div>
+                        </td>
+                        <td class="py-3 pr-4">
+                            <div class="flex -space-x-2">
+                                {{ range $project.members }}
+                                    {{ $member := index $users . }}
+                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent text-[10px] font-semibold ring-2 ring-white dark:ring-[#0f172a]" title="{{ $member.fullName }}">{{ $member.initials }}</span>
+                                {{ end }}
+                            </div>
+                        </td>
+                        <td class="py-3 pr-4">{{ len $project.datasets }}</td>
+                        <td class="py-3 pr-4">{{ with $project.usage }}{{ printf "%.1f GB" .storage_gb }}{{ end }}</td>
+                        <td class="py-3 pr-4 text-muted">{{ $project.last_activity }}</td>
+                        <td class="py-3">
+                            <div class="flex gap-2">
+                                <a href="/user/{{ $userId }}/project/{{ $projectId }}/" class="text-sm text-brand-500 hover:underline dark:text-accent">Manage</a>
+                                <button class="text-sm text-muted hover:text-red-600" onclick="notify('Project would be archived.', 'warning');">Archive</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Team & access -->
+    <div class="surface-card p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <div class="kicker">Team</div>
+                <h2 class="text-2xl mt-1">Team &amp; access</h2>
+            </div>
+            <button class="btn-primary" onclick="notify('Invite dialog would open here.', 'info');">+ Invite member</button>
+        </div>
+        {{ if $teammates }}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-[var(--color-surface-border)] dark:border-white/10">
+                        <th class="py-2 pr-4">Member</th>
+                        <th class="py-2 pr-4">Role</th>
+                        <th class="py-2 pr-4">Shared projects</th>
+                        <th class="py-2 pr-4">Last seen</th>
+                        <th class="py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range $teammates }}
+                        {{ $member := index $users . }}
+                        {{ $shared := slice }}
+                        {{ range $projectId, $project := $userProjects }}
+                            {{ if in $project.members $member }}{{/* never matches — $member is the id */}}{{ end }}
+                        {{ end }}
+                        {{ $tid := . }}
+                        {{ $sharedNames := slice }}
+                        {{ range $projectId, $project := $userProjects }}
+                            {{ if in $project.members $tid }}
+                                {{ $sharedNames = $sharedNames | append $project.name }}
+                            {{ end }}
+                        {{ end }}
+                    <tr class="border-b border-[var(--color-surface-border)]/60 dark:border-white/5">
+                        <td class="py-3 pr-4">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent text-xs font-semibold">{{ $member.initials }}</span>
+                                <div>
+                                    <div class="font-medium">{{ $member.fullName }}</div>
+                                    <div class="text-xs text-muted">{{ $member.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 pr-4">{{ $member.role }}</td>
+                        <td class="py-3 pr-4">{{ delimit $sharedNames ", " }}</td>
+                        <td class="py-3 pr-4 text-muted">Online</td>
+                        <td class="py-3">
+                            <div class="flex gap-3">
+                                <button class="text-sm text-brand-500 hover:underline dark:text-accent" onclick="notify('Message thread would open here.', 'info');">Message</button>
+                                <button class="text-sm text-muted hover:text-red-600" onclick="notify('Access would be revoked.', 'warning');">Remove</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+        {{ else }}
+        <p class="text-muted text-sm">You're flying solo — no collaborators across your projects yet. Invite someone to share a project with.</p>
+        {{ end }}
+    </div>
+
+    <!-- Usage by project -->
+    <div class="surface-card p-6 mb-6">
+        <div class="kicker mb-2">Usage</div>
+        <h2 class="text-2xl mb-5">Usage by project</h2>
+        <div class="space-y-5">
+            {{ range $projectId, $project := $userProjects }}
+                {{ $s := 0.0 }}{{ $c := 0.0 }}
+                {{ with $project.usage }}{{ $s = .storage_gb | float }}{{ $c = .compute_hours_month | float }}{{ end }}
+                {{ $sp := 0 }}{{ if gt $storageQuota 0.0 }}{{ $sp = mul (div $s $storageQuota) 100 }}{{ end }}
+                {{ $cp := 0 }}{{ if gt $computeQuota 0.0 }}{{ $cp = mul (div $c $computeQuota) 100 }}{{ end }}
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <a href="/user/{{ $userId }}/project/{{ $projectId }}/" class="font-medium hover:text-brand-500 dark:hover:text-accent">{{ $project.name }}</a>
+                    <span class="text-xs text-muted">${{ with $project.usage }}{{ .monthly_cost }}{{ end }} this month</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex items-center justify-between text-xs text-muted mb-1">
+                            <span>Storage</span>
+                            <span>{{ printf "%.1f GB · %.0f%%" $s $sp }}</span>
+                        </div>
+                        <div class="progress {{ if gt $sp 85.0 }}danger{{ else if gt $sp 70.0 }}warn{{ end }}">
+                            <div class="bar" style="width: {{ printf "%.0f" $sp }}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between text-xs text-muted mb-1">
+                            <span>Compute</span>
+                            <span>{{ printf "%.1f h · %.0f%%" $c $cp }}</span>
+                        </div>
+                        <div class="progress {{ if gt $cp 85.0 }}danger{{ else if gt $cp 70.0 }}warn{{ end }}">
+                            <div class="bar" style="width: {{ printf "%.0f" $cp }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+    </div>
+</div>
+
+<div id="notification-container" class="fixed top-4 right-4 z-50"></div>
+
+<script>
+function notify(message, type = 'info', duration = 2500) {
+    const container = document.getElementById('notification-container');
+    const colors = {
+        info: 'bg-brand-500 text-white',
+        success: 'bg-emerald-600 text-white',
+        warning: 'bg-amber-500 text-ink-900',
+        error: 'bg-red-600 text-white'
+    };
+    const node = document.createElement('div');
+    node.className = `notification mb-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${colors[type] || colors.info}`;
+    node.style.opacity = '0';
+    node.style.transform = 'translateX(400px)';
+    node.style.transition = 'all 250ms ease';
+    node.textContent = message;
+    container.appendChild(node);
+    requestAnimationFrame(() => { node.style.opacity = '1'; node.style.transform = 'translateX(0)'; });
+    setTimeout(() => {
+        node.style.opacity = '0';
+        node.style.transform = 'translateX(400px)';
+        setTimeout(() => node.remove(), 260);
+    }, duration);
+}
+
+const userEmail = localStorage.getItem('userEmail');
+const isAdmin = localStorage.getItem('isAdmin') === 'true';
+if (!userEmail) {
+    window.location.href = '/';
+} else if (!isAdmin) {
+    const uid = localStorage.getItem('userId');
+    window.location.href = uid ? `/user/${uid}/` : '/';
+}
+</script>
+{{ end }}

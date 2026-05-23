@@ -3,6 +3,11 @@ short_description: "Coastal seabird monitoring in northern Labrador"
 description: "Long-term monitoring of seabird populations and migration routes across the Nunatsiavut coast, integrating field census, satellite telemetry, and habitat modelling."
 created: "2023-08-04"
 location: "Nunatsiavut, NL"
+last_activity: "12 minutes ago"
+usage:
+  storage_gb: 47.1
+  compute_hours_month: 64.8
+  monthly_cost: 96
 members:
   - kc
   - sd

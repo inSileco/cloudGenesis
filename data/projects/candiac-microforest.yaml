@@ -3,6 +3,11 @@ short_description: "Ecological monitoring of a Miyawaki-style microforest"
 description: "Multi-year monitoring of a community microforest in Candiac, Québec. The project documents biodiversity, soil health, canopy growth and ecosystem services through field surveys, LiDAR and citizen-science contributions."
 created: "2024-05-12"
 location: "Candiac, Québec"
+last_activity: "4 hours ago"
+usage:
+  storage_gb: 24.5
+  compute_hours_month: 18.5
+  monthly_cost: 42
 members:
   - kc
   - mhb

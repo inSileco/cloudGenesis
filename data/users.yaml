@@ -2,11 +2,122 @@ kc:
   fullName: "Kevin Cazelles"
   initials: "KC"
   role: "Lead scientist"
+  email: "kc@fake.io"
+  admin: true
+  bio: "Quantitative ecologist building open-source tools for biodiversity science."
+  location: "Sherbrooke, QC"
+  timezone: "America/Montreal"
+  joined: "2023-04-12"
+  plan: "Research Pro"
+  cost_monthly: 148
+  next_invoice: "2026-06-01"
+  quotas:
+    storage_gb: 250
+    compute_hours: 200
+    seats: 5
+  tokens:
+    - name: "field-uploader"
+      created: "2025-09-12"
+      last_used: "2 hours ago"
+      scope: "datasets:write"
+    - name: "pipeline-runner"
+      created: "2025-03-04"
+      last_used: "Yesterday"
+      scope: "pipelines:run"
+    - name: "read-only-export"
+      created: "2026-04-22"
+      last_used: "Never"
+      scope: "reports:read"
+  sessions:
+    - device: "Chrome on macOS"
+      location: "Sherbrooke, QC"
+      last_active: "Now"
+      current: true
+    - device: "Firefox on Ubuntu"
+      location: "Québec, QC"
+      last_active: "2 days ago"
+      current: false
+    - device: "Mobile Safari on iOS"
+      location: "Montréal, QC"
+      last_active: "1 week ago"
+      current: false
 mhb:
   fullName: "Marie-Hélène Brice"
   initials: "MHB"
   role: "Ecologist"
+  email: "mhb@fake.io"
+  bio: "Forest ecologist focused on urban biodiversity restoration and microforests."
+  location: "Montréal, QC"
+  timezone: "America/Montreal"
+  joined: "2024-05-12"
+  plan: "Research"
+  cost_monthly: 49
+  next_invoice: "2026-06-01"
+  quotas:
+    storage_gb: 100
+    compute_hours: 80
+    seats: 2
+  tokens:
+    - name: "field-import"
+      created: "2024-08-30"
+      last_used: "5 hours ago"
+      scope: "datasets:write"
+    - name: "report-publisher"
+      created: "2025-01-14"
+      last_used: "3 days ago"
+      scope: "reports:write"
+  sessions:
+    - device: "Firefox on macOS"
+      location: "Montréal, QC"
+      last_active: "Now"
+      current: true
+    - device: "Chrome on Windows"
+      location: "Montréal, QC"
+      last_active: "4 hours ago"
+      current: false
 sd:
   fullName: "Steve Vissault"
   initials: "SV"
   role: "Data engineer"
+  email: "sd@fake.io"
+  bio: "Data engineer maintaining ingest pipelines and dashboards for the platform."
+  location: "Rimouski, QC"
+  timezone: "America/Montreal"
+  joined: "2023-08-04"
+  plan: "Research Pro"
+  cost_monthly: 219
+  next_invoice: "2026-06-01"
+  quotas:
+    storage_gb: 500
+    compute_hours: 400
+    seats: 5
+  tokens:
+    - name: "satellite-ingest"
+      created: "2024-02-19"
+      last_used: "12 minutes ago"
+      scope: "datasets:write,pipelines:run"
+    - name: "telemetry-sync"
+      created: "2023-08-04"
+      last_used: "Now"
+      scope: "datasets:write"
+    - name: "ops-readonly"
+      created: "2025-11-02"
+      last_used: "Yesterday"
+      scope: "*:read"
+    - name: "ci-deploy"
+      created: "2026-01-10"
+      last_used: "Today"
+      scope: "apps:deploy"
+  sessions:
+    - device: "Chrome on Ubuntu"
+      location: "Rimouski, QC"
+      last_active: "Now"
+      current: true
+    - device: "Mobile Chrome on Android"
+      location: "Rimouski, QC"
+      last_active: "30 minutes ago"
+      current: false
+    - device: "Safari on iPad"
+      location: "Québec, QC"
+      last_active: "5 days ago"
+      current: false
