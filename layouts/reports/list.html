@@ -1,0 +1,64 @@
+{{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
+
+{{ define "main" }}
+{{ $userId := .Params.userId }}
+{{ $projectId := .Params.projectId }}
+{{ $project := index .Site.Data.projects $projectId }}
+
+<div class="container mx-auto px-4 py-10 max-w-6xl">
+    <div class="mb-6 flex items-center gap-2 text-sm">
+        <a href="/user/{{ $userId }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">Projects</a>
+        <span class="text-muted">/</span>
+        <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            {{ $project.name }}
+        </a>
+    </div>
+
+    <div class="mb-8">
+        <div class="kicker mb-2">Reports</div>
+        <h1 class="text-4xl md:text-5xl mb-2">All reports</h1>
+        <div class="accent-rule mb-4"></div>
+        <p class="text-muted">{{ $project.name }} — {{ len $project.reports }} report{{ if ne (len $project.reports) 1 }}s{{ end }}.</p>
+    </div>
+
+    <section class="surface-card p-6 mb-8">
+        <div class="kicker mb-2">What are reports?</div>
+        <h2 class="text-2xl mb-3">Shareable, generated documents</h2>
+        <p class="leading-relaxed text-muted">Reports are shareable documents summarising findings from your data. They combine narrative, figures and tables produced from one or more datasets, and are versioned so you can always trace which dataset version produced which conclusion. A report can be a draft while in progress, then move to published when it is ready to distribute outside the team.</p>
+    </section>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {{ range $project.reports }}
+        <a href="/user/{{ $userId }}/project/{{ $projectId }}/reports/{{ .id }}" class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
+            <div class="flex items-start justify-between mb-3 gap-3">
+                <div class="min-w-0">
+                    <div class="kicker">Report</div>
+                    <h3 class="text-lg mt-1 group-hover:text-brand-500 dark:group-hover:text-accent transition-colors">{{ .name }}</h3>
+                </div>
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent flex-shrink-0">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </span>
+            </div>
+            {{ with .description }}<p class="text-sm text-muted mb-4 line-clamp-3">{{ . }}</p>{{ end }}
+            <div class="flex flex-wrap gap-2 mb-3">
+                <span class="pill pill-brand">{{ .format }}</span>
+                {{ with .file_size }}<span class="pill pill-brand">{{ . }}</span>{{ end }}
+                {{ with .status }}
+                <span class="pill {{ if eq . "published" }}pill-success{{ else if eq . "draft" }}pill-warning{{ else }}pill-brand{{ end }}">{{ . }}</span>
+                {{ end }}
+            </div>
+            <div class="flex items-center justify-between text-xs text-muted pt-3 border-t border-[var(--color-surface-border)] dark:border-white/10">
+                {{ with .generated_date }}<span>Generated {{ . }}</span>{{ else }}<span></span>{{ end }}
+                {{ with .last_updated }}<span>Updated {{ . }}</span>{{ end }}
+            </div>
+        </a>
+        {{ end }}
+    </div>
+</div>
+
+<script>
+const userEmail = localStorage.getItem('userEmail');
+if (!userEmail) window.location.href = '/';
+</script>
+{{ end }}

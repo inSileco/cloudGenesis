@@ -81,13 +81,15 @@
             <p class="text-sm text-muted mb-4">Project data collections.</p>
             <ul class="space-y-2">
                 {{ range first 4 $project.datasets }}
-                <li class="surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors cursor-pointer">
-                    <div class="font-medium">{{ .name }}</div>
-                    <div class="text-sm text-muted">{{ .format }} • {{ .volume }}</div>
+                <li>
+                    <a href="/user/{{ $userId }}/project/{{ $projectId }}/datasets/{{ .id }}" class="block surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors">
+                        <div class="font-medium">{{ .name }}</div>
+                        <div class="text-sm text-muted">{{ .format }} • {{ .volume }}</div>
+                    </a>
                 </li>
                 {{ end }}
             </ul>
-            <button class="btn-primary w-full mt-5">View all datasets ({{ len $project.datasets }})</button>
+            <a href="/user/{{ $userId }}/project/{{ $projectId }}/datasets/" class="btn-primary w-full mt-5 inline-flex items-center justify-center">View all datasets ({{ len $project.datasets }})</a>
         </section>
 
         <!-- Reports -->
@@ -112,7 +114,7 @@
                 </li>
                 {{ end }}
             </ul>
-            <button class="btn-primary w-full mt-5">View all reports ({{ len $project.reports }})</button>
+            <a href="/user/{{ $userId }}/project/{{ $projectId }}/reports/" class="btn-primary w-full mt-5 inline-flex items-center justify-center">View all reports ({{ len $project.reports }})</a>
         </section>
 
         <!-- Automations -->
@@ -147,7 +149,7 @@
                 </li>
                 {{ end }}
             </ul>
-            <button class="btn-primary w-full mt-5">View all automations ({{ len $project.automations }})</button>
+            <a href="/user/{{ $userId }}/project/{{ $projectId }}/automations/" class="btn-primary w-full mt-5 inline-flex items-center justify-center">View all automations ({{ len $project.automations }})</a>
         </section>
 
         <!-- Apps -->
@@ -179,7 +181,7 @@
                 </li>
                 {{ end }}
             </ul>
-            <button class="btn-primary w-full mt-5">View all apps</button>
+            <a href="/user/{{ $userId }}/project/{{ $projectId }}/apps/" class="btn-primary w-full mt-5 inline-flex items-center justify-center">View all apps ({{ len $project.apps }})</a>
         </section>
     </div>
 </div>
