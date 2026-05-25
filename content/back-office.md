@@ -1,7 +1,6 @@
 ---
 title: "Back office"
-date: 2026-05-22
+date: 2026-05-25
 draft: false
-userId: "kc"
 type: "back-office"
 ---
