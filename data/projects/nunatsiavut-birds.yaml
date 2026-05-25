@@ -62,7 +62,7 @@ apps:
   - name: "Habitat Explorer"
     description: "Layered habitat maps"
     url: "#"
-pipelines:
+automations:
   - id: "telemetry-ingest"
     name: "Telemetry Ingest"
     description: "Pulls the latest GPS fixes from satellite collar providers, deduplicates and writes nightly track segments to the project store."

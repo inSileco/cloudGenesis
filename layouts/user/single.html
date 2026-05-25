@@ -26,7 +26,7 @@
                 {{ $datasetCount := len $project.datasets }}
                 {{ $reportCount := len $project.reports }}
                 {{ $appCount := len $project.apps }}
-                {{ $pipelineCount := len $project.pipelines }}
+                {{ $automationCount := len $project.automations }}
                 {{ $memberCount := len $project.members }}
                 <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
                     <div class="flex items-start justify-between mb-3">
@@ -43,7 +43,7 @@
                     <div class="flex flex-wrap gap-2 mb-4">
                         <span class="pill pill-brand">{{ $datasetCount }} datasets</span>
                         <span class="pill pill-brand">{{ $reportCount }} reports</span>
-                        <span class="pill pill-brand">{{ $pipelineCount }} pipelines</span>
+                        <span class="pill pill-brand">{{ $automationCount }} automations</span>
                         <span class="pill pill-brand">{{ $appCount }} apps</span>
                     </div>
 

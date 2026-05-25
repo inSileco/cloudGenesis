@@ -2,8 +2,8 @@
 title: "Species Map Tiles"
 date: 2026-05-09
 draft: false
-userId: "mhb"
+userId: "kc"
 projectId: "candiac-microforest"
-pipelineId: "species-map-tiles"
-type: "pipeline"
+automationId: "species-map-tiles"
+type: "automation"
 ---

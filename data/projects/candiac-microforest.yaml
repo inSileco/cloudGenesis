@@ -82,7 +82,7 @@ apps:
   - name: "Survey Notebook"
     description: "Plot-level field notes"
     url: "#"
-pipelines:
+automations:
   - id: "biodiversity-etl"
     name: "Biodiversity ETL"
     description: "Ingests raw census CSVs, resolves taxa against GBIF, computes Shannon and Simpson diversity indices, and writes parquet outputs back to the project dataset store."

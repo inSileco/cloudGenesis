@@ -166,7 +166,7 @@
                 <div class="mb-6">
                     <h3 class="font-semibold mb-3">Email notifications</h3>
                     <ul class="space-y-3">
-                        {{ range slice (dict "label" "Pipeline failures" "on" true) (dict "label" "New members" "on" true) (dict "label" "Weekly digest" "on" false) (dict "label" "Mentions in comments" "on" true) }}
+                        {{ range slice (dict "label" "Automation failures" "on" true) (dict "label" "New members" "on" true) (dict "label" "Weekly digest" "on" false) (dict "label" "Mentions in comments" "on" true) }}
                         <li class="flex items-center justify-between gap-4 surface-soft p-3">
                             <span class="text-sm">{{ .label }}</span>
                             <button type="button" class="toggle-switch {{ if .on }}on{{ end }}" onclick="this.classList.toggle('on'); notify('Preference saved.', 'success', 1500);" aria-label="Toggle"></button>
@@ -178,7 +178,7 @@
                 <div>
                     <h3 class="font-semibold mb-3">In-app notifications</h3>
                     <ul class="space-y-3">
-                        {{ range slice (dict "label" "Pipeline status changes" "on" true) (dict "label" "Dataset uploads" "on" true) (dict "label" "Report comments" "on" false) }}
+                        {{ range slice (dict "label" "Automation status changes" "on" true) (dict "label" "Dataset uploads" "on" true) (dict "label" "Report comments" "on" false) }}
                         <li class="flex items-center justify-between gap-4 surface-soft p-3">
                             <span class="text-sm">{{ .label }}</span>
                             <button type="button" class="toggle-switch {{ if .on }}on{{ end }}" onclick="this.classList.toggle('on'); notify('Preference saved.', 'success', 1500);" aria-label="Toggle"></button>
@@ -233,7 +233,7 @@
                     <div class="flex items-center justify-between gap-4 surface-soft p-4">
                         <div>
                             <div class="font-semibold">Export account data</div>
-                            <div class="text-sm text-muted">Download a copy of every dataset, report and pipeline run you have access to.</div>
+                            <div class="text-sm text-muted">Download a copy of every dataset, report and automation run you have access to.</div>
                         </div>
                         <button class="btn-ghost" onclick="notify('Export queued. You will receive an email when ready.', 'info');">Export</button>
                     </div>

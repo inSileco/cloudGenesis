@@ -60,7 +60,7 @@ apps:
   - name: "Satellite Browser"
     description: "Tile-based imagery explorer"
     url: "#"
-pipelines:
+automations:
   - id: "satellite-ingest"
     name: "Satellite Ingest"
     description: "Polls the satellite provider for new scenes, downloads matching tiles and stages them for the imagery archive."

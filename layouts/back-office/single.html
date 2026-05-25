@@ -26,16 +26,16 @@
                 {{ $teammates = $teammates | append . }}
             {{ end }}
         {{ end }}
-        {{ range $project.pipelines }}
-            {{ $pipeline := . }}
+        {{ range $project.automations }}
+            {{ $automation := . }}
             {{ range .recent_runs }}
                 {{ $events = $events | append (dict
-                    "kind" "pipeline"
-                    "title" (printf "Pipeline %s — %s" $pipeline.name .status)
+                    "kind" "automation"
+                    "title" (printf "Automation %s — %s" $automation.name .status)
                     "subtitle" $project.name
                     "date" .date
                     "status" .status
-                    "url" (printf "/user/%s/project/%s/pipelines/%s/" $userId $projectId $pipeline.id)
+                    "url" (printf "/user/%s/project/%s/automations/%s/" $userId $projectId $automation.id)
                 ) }}
             {{ end }}
         {{ end }}
@@ -124,9 +124,9 @@
                 {{ range first 8 $events }}
                 <li class="relative">
                     <span class="absolute -left-[34px] flex h-7 w-7 items-center justify-center rounded-full
-                        {{ if eq .kind "pipeline" }}bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent{{ else }}bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300{{ end }}
+                        {{ if eq .kind "automation" }}bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent{{ else }}bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300{{ end }}
                         ring-4 ring-white dark:ring-[#0f172a]">
-                        {{ if eq .kind "pipeline" }}
+                        {{ if eq .kind "automation" }}
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
                         {{ else }}
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -182,7 +182,7 @@
                 <div class="kicker mb-2">Status</div>
                 <h2 class="text-xl mb-4">System health</h2>
                 <ul class="space-y-3 text-sm">
-                    {{ range slice (dict "name" "Cloud storage" "status" "ok") (dict "name" "Pipelines" "status" "ok") (dict "name" "API" "status" "ok") (dict "name" "Reports" "status" "warn" "note" "elevated latency") (dict "name" "Apps" "status" "ok") }}
+                    {{ range slice (dict "name" "Cloud storage" "status" "ok") (dict "name" "Automations" "status" "ok") (dict "name" "API" "status" "ok") (dict "name" "Reports" "status" "warn" "note" "elevated latency") (dict "name" "Apps" "status" "ok") }}
                     <li class="flex items-center justify-between">
                         <span class="flex items-center gap-2">
                             <span class="status-dot {{ .status }}"></span>

@@ -107,12 +107,12 @@
             <button class="btn-primary w-full mt-5">View all reports ({{ len $project.reports }})</button>
         </section>
 
-        <!-- Pipelines -->
+        <!-- Automations -->
         <section class="surface-card p-6">
             <div class="flex items-start justify-between mb-4">
                 <div>
                     <div class="kicker">03 — Workflow</div>
-                    <h2 class="text-2xl mt-1">Pipelines</h2>
+                    <h2 class="text-2xl mt-1">Automations</h2>
                 </div>
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/><circle cx="18" cy="18" r="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -120,9 +120,9 @@
             </div>
             <p class="text-sm text-muted mb-4">Automated data workflows.</p>
             <ul class="space-y-2">
-                {{ range first 3 $project.pipelines }}
+                {{ range first 3 $project.automations }}
                 <li>
-                    <a href="/user/{{ $userId }}/project/{{ $projectId }}/pipelines/{{ .id }}" class="block surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors">
+                    <a href="/user/{{ $userId }}/project/{{ $projectId }}/automations/{{ .id }}" class="block surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors">
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0">
                                 <div class="font-medium truncate">{{ .name }}</div>
@@ -139,7 +139,7 @@
                 </li>
                 {{ end }}
             </ul>
-            <button class="btn-primary w-full mt-5">View all pipelines ({{ len $project.pipelines }})</button>
+            <button class="btn-primary w-full mt-5">View all automations ({{ len $project.automations }})</button>
         </section>
 
         <!-- Apps -->
