@@ -1,0 +1,346 @@
+{{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
+
+{{ define "main" }}
+{{ $userId := .Params.userId }}
+{{ $projectId := .Params.projectId }}
+{{ $project := index .Site.Data.projects $projectId }}
+{{ $users := .Site.Data.users }}
+{{ $owner := $project.owner }}
+{{ $admins := default (slice) $project.admins }}
+
+{{/* Aggregate per-project activity */}}
+{{ $events := slice }}
+{{ range $project.automations }}
+    {{ $automation := . }}
+    {{ range .recent_runs }}
+        {{ $events = $events | append (dict
+            "kind" "automation"
+            "title" (printf "Automation %s — %s" $automation.name .status)
+            "date" .date
+            "status" .status
+            "url" (printf "/user/%s/project/%s/automations/%s/" $userId $projectId $automation.id)
+        ) }}
+    {{ end }}
+{{ end }}
+{{ range $project.reports }}
+    {{ $events = $events | append (dict
+        "kind" "report"
+        "title" (printf "Report %q generated" .name)
+        "date" .generated_date
+        "status" .status
+        "url" (printf "/user/%s/project/%s/reports/%s/" $userId $projectId .id)
+    ) }}
+{{ end }}
+{{ $events = sort $events "date" "desc" }}
+
+{{ $storageQuota := 0.0 }}{{ $computeQuota := 0.0 }}
+{{ with $project.quotas }}{{ $storageQuota = .storage_gb | float }}{{ $computeQuota = .compute_hours | float }}{{ end }}
+{{ $storageUsed := 0.0 }}{{ $computeUsed := 0.0 }}{{ $monthlyCost := 0 }}
+{{ with $project.usage }}{{ $storageUsed = .storage_gb | float }}{{ $computeUsed = .compute_hours_month | float }}{{ $monthlyCost = .monthly_cost }}{{ end }}
+{{ $storagePct := 0 }}{{ if gt $storageQuota 0.0 }}{{ $storagePct = mul (div $storageUsed $storageQuota) 100 }}{{ end }}
+{{ $computePct := 0 }}{{ if gt $computeQuota 0.0 }}{{ $computePct = mul (div $computeUsed $computeQuota) 100 }}{{ end }}
+
+<div class="container mx-auto px-4 py-10 max-w-6xl">
+    <div class="mb-6 flex items-center gap-2 text-sm">
+        <a href="/user/{{ $userId }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">Projects</a>
+        <span class="text-muted">/</span>
+        <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            {{ $project.name }}
+        </a>
+    </div>
+
+    <div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+            <div class="kicker mb-2">Project settings</div>
+            <h1 class="text-4xl md:text-5xl mb-2">{{ $project.name }}</h1>
+            <div class="accent-rule mb-4"></div>
+            <p class="text-muted">Manage members, billing and project details.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <span class="pill pill-brand">{{ $project.plan }} plan</span>
+            <span class="pill" id="role-badge"></span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Project info -->
+        <section class="surface-card p-6 lg:col-span-2">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <div class="kicker">Info</div>
+                    <h2 class="text-2xl mt-1">Project information</h2>
+                </div>
+                <button class="btn-ghost text-sm" onclick="notify('Edit dialog would open here.', 'info');">Edit</button>
+            </div>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Name</dt>
+                    <dd class="mt-1 font-medium">{{ $project.name }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Location</dt>
+                    <dd class="mt-1">{{ default "—" $project.location }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Created</dt>
+                    <dd class="mt-1">{{ default "—" $project.created }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Owner</dt>
+                    <dd class="mt-1 font-medium">{{ with index $users $owner }}{{ .fullName }}{{ end }}</dd>
+                </div>
+                <div class="sm:col-span-2">
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Short description</dt>
+                    <dd class="mt-1">{{ $project.short_description }}</dd>
+                </div>
+                <div class="sm:col-span-2">
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Description</dt>
+                    <dd class="mt-1 text-muted">{{ $project.description }}</dd>
+                </div>
+            </dl>
+        </section>
+
+        <!-- Billing -->
+        <section class="surface-card p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <div class="kicker">Billing</div>
+                    <h2 class="text-xl mt-1">Plan &amp; invoice</h2>
+                </div>
+            </div>
+            <dl class="space-y-3 text-sm">
+                <div class="flex items-center justify-between">
+                    <dt class="text-muted">Plan</dt>
+                    <dd class="font-semibold">{{ $project.plan }}</dd>
+                </div>
+                <div class="flex items-center justify-between">
+                    <dt class="text-muted">Storage quota</dt>
+                    <dd class="font-semibold">{{ $storageQuota }} GB</dd>
+                </div>
+                <div class="flex items-center justify-between">
+                    <dt class="text-muted">Compute quota</dt>
+                    <dd class="font-semibold">{{ $computeQuota }} h / month</dd>
+                </div>
+                <div class="flex items-center justify-between">
+                    <dt class="text-muted">Seats</dt>
+                    <dd class="font-semibold">{{ len $project.members }} / {{ with $project.quotas }}{{ .seats }}{{ end }}</dd>
+                </div>
+                <div class="flex items-center justify-between">
+                    <dt class="text-muted">Monthly</dt>
+                    <dd class="font-semibold">${{ $monthlyCost }}</dd>
+                </div>
+                <div class="flex items-center justify-between">
+                    <dt class="text-muted">Next invoice</dt>
+                    <dd class="font-semibold">{{ with $project.billing }}{{ .next_invoice }}{{ end }}</dd>
+                </div>
+            </dl>
+            <button class="btn-primary w-full mt-5 requires-owner" onclick="notify('Billing portal would open here.', 'info');">Manage billing</button>
+        </section>
+    </div>
+
+    <!-- Usage -->
+    <section class="surface-card p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <div class="kicker">Usage</div>
+                <h2 class="text-2xl mt-1">Resource usage</h2>
+            </div>
+            <span class="text-xs text-muted">This billing period</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <div class="flex items-center justify-between mb-1 text-sm">
+                    <span class="text-muted">Storage</span>
+                    <span class="font-semibold">{{ printf "%.1f GB / %.0f GB · %.0f%%" $storageUsed $storageQuota $storagePct }}</span>
+                </div>
+                <div class="progress {{ if gt $storagePct 85.0 }}danger{{ else if gt $storagePct 70.0 }}warn{{ end }}">
+                    <div class="bar" style="width: {{ printf "%.0f" $storagePct }}%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-1 text-sm">
+                    <span class="text-muted">Compute</span>
+                    <span class="font-semibold">{{ printf "%.1f h / %.0f h · %.0f%%" $computeUsed $computeQuota $computePct }}</span>
+                </div>
+                <div class="progress {{ if gt $computePct 85.0 }}danger{{ else if gt $computePct 70.0 }}warn{{ end }}">
+                    <div class="bar" style="width: {{ printf "%.0f" $computePct }}%"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Members -->
+    <section class="surface-card p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <div class="kicker">Team</div>
+                <h2 class="text-2xl mt-1">Members &amp; roles</h2>
+            </div>
+            <button class="btn-primary" onclick="notify('Invite dialog would open here.', 'info');">+ Invite member</button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-[var(--color-surface-border)] dark:border-white/10">
+                        <th class="py-2 pr-4">Member</th>
+                        <th class="py-2 pr-4">Role</th>
+                        <th class="py-2 pr-4">Email</th>
+                        <th class="py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range $project.members }}
+                        {{ $memberId := . }}
+                        {{ $member := index $users $memberId }}
+                        {{ $role := "member" }}
+                        {{ if eq $memberId $owner }}{{ $role = "owner" }}
+                        {{ else if in $admins $memberId }}{{ $role = "admin" }}{{ end }}
+                    <tr class="border-b border-[var(--color-surface-border)]/60 dark:border-white/5">
+                        <td class="py-3 pr-4">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent text-xs font-semibold">{{ $member.initials }}</span>
+                                <div>
+                                    <div class="font-medium">{{ $member.fullName }}</div>
+                                    <div class="text-xs text-muted">{{ $member.role }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 pr-4">
+                            <span class="pill {{ if eq $role "owner" }}pill-success{{ else if eq $role "admin" }}pill-brand{{ else }}pill-warning{{ end }}">{{ $role }}</span>
+                        </td>
+                        <td class="py-3 pr-4 text-muted">{{ $member.email }}</td>
+                        <td class="py-3">
+                            <div class="flex gap-3">
+                                {{ if eq $role "owner" }}
+                                <span class="text-xs text-muted">—</span>
+                                {{ else }}
+                                <button class="text-sm text-brand-500 hover:underline dark:text-accent" onclick="notify('Role editor would open here.', 'info');">Change role</button>
+                                <button class="text-sm text-muted hover:text-red-600" onclick="notify('Member would be removed.', 'warning');">Remove</button>
+                                {{ end }}
+                            </div>
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Recent activity -->
+    <section class="surface-card p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <div class="kicker">Activity</div>
+                <h2 class="text-2xl mt-1">Recent activity</h2>
+            </div>
+            <span class="text-xs text-muted">{{ len $events }} events</span>
+        </div>
+        {{ if $events }}
+        <ol class="relative border-l-2 border-[var(--color-surface-border)] dark:border-white/10 ml-3 space-y-4 pl-6">
+            {{ range first 8 $events }}
+            <li class="relative">
+                <span class="absolute -left-[34px] flex h-7 w-7 items-center justify-center rounded-full
+                    {{ if eq .kind "automation" }}bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent{{ else }}bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300{{ end }}
+                    ring-4 ring-white dark:ring-[#0f172a]">
+                    {{ if eq .kind "automation" }}
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                    {{ else }}
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    {{ end }}
+                </span>
+                <a href="{{ .url }}" class="block surface-soft p-3 hover:border-brand-300 dark:hover:border-accent/60 transition-colors">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="font-medium truncate">{{ .title }}</div>
+                            <div class="text-xs text-muted">{{ .date }}</div>
+                        </div>
+                        <span class="pill flex-shrink-0
+                            {{ if eq .status "success" }}pill-success
+                            {{ else if eq .status "failed" }}pill-error
+                            {{ else if eq .status "warning" }}pill-warning
+                            {{ else if eq .status "published" }}pill-success
+                            {{ else if eq .status "draft" }}pill-warning
+                            {{ else }}pill-brand{{ end }}">{{ .status }}</span>
+                    </div>
+                </a>
+            </li>
+            {{ end }}
+        </ol>
+        {{ else }}
+        <p class="text-muted text-sm">No recorded activity yet.</p>
+        {{ end }}
+    </section>
+
+    <!-- Danger zone -->
+    <section class="surface-card p-6 border-red-200 dark:border-red-900/40 requires-owner">
+        <div class="kicker mb-2" style="color:#dc2626">Danger zone</div>
+        <h2 class="text-2xl mb-4">Danger zone</h2>
+        <p class="text-sm text-muted mb-4">These actions are restricted to the project owner.</p>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between gap-4 surface-soft p-4">
+                <div>
+                    <div class="font-semibold">Transfer ownership</div>
+                    <div class="text-sm text-muted">Hand over the project to another admin. You will keep admin access unless removed.</div>
+                </div>
+                <button class="btn-ghost" onclick="notify('Transfer flow would start here.', 'info');">Transfer</button>
+            </div>
+            <div class="flex items-center justify-between gap-4 p-4 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50/60 dark:bg-red-900/10">
+                <div>
+                    <div class="font-semibold text-red-700 dark:text-red-300">Archive project</div>
+                    <div class="text-sm text-muted">Hide the project and stop all automations. This is reversible by a sysadmin.</div>
+                </div>
+                <button class="btn-ghost" style="border-color:#dc2626;color:#dc2626" onclick="notify('Project would be archived.', 'error');">Archive</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="notification-container" class="fixed top-4 right-4 z-50"></div>
+
+<script>
+const OWNER_ID = {{ $owner | jsonify | safeJS }};
+const ADMIN_IDS = {{ $admins | jsonify | safeJS }};
+
+function notify(message, type = 'info', duration = 2500) {
+    const container = document.getElementById('notification-container');
+    const colors = {
+        info: 'bg-brand-500 text-white',
+        success: 'bg-emerald-600 text-white',
+        warning: 'bg-amber-500 text-ink-900',
+        error: 'bg-red-600 text-white'
+    };
+    const node = document.createElement('div');
+    node.className = `notification mb-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${colors[type] || colors.info}`;
+    node.style.opacity = '0';
+    node.style.transform = 'translateX(400px)';
+    node.style.transition = 'all 250ms ease';
+    node.textContent = message;
+    container.appendChild(node);
+    requestAnimationFrame(() => { node.style.opacity = '1'; node.style.transform = 'translateX(0)'; });
+    setTimeout(() => {
+        node.style.opacity = '0';
+        node.style.transform = 'translateX(400px)';
+        setTimeout(() => node.remove(), 260);
+    }, duration);
+}
+
+const userEmail = localStorage.getItem('userEmail');
+const userId = localStorage.getItem('userId');
+if (!userEmail) {
+    window.location.href = '/';
+} else if (userId !== OWNER_ID && !ADMIN_IDS.includes(userId)) {
+    window.location.href = userId ? `/user/${userId}/` : '/';
+} else {
+    const isOwner = userId === OWNER_ID;
+    const badge = document.getElementById('role-badge');
+    if (badge) {
+        badge.textContent = isOwner ? 'owner' : 'admin';
+        badge.classList.add(isOwner ? 'pill-success' : 'pill-brand');
+    }
+    if (!isOwner) {
+        document.querySelectorAll('.requires-owner').forEach(el => el.classList.add('hidden'));
+    }
+}
+</script>
+{{ end }}
