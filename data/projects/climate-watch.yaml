@@ -4,12 +4,21 @@ description: "Integrated climate modelling and ocean monitoring across the Atlan
 created: "2024-02-19"
 location: "North Atlantic basin"
 last_activity: "30 minutes ago"
+owner: sd
+admins: []
+members:
+  - sd
+plan: "Enterprise"
+quotas:
+  storage_gb: 500
+  compute_hours: 400
+  seats: 10
+billing:
+  next_invoice: "2026-06-01"
 usage:
   storage_gb: 184.2
   compute_hours_month: 142.6
   monthly_cost: 312
-members:
-  - sd
 datasets:
   - name: "Climate Model Outputs"
     format: "netcdf"

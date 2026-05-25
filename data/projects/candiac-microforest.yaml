@@ -4,13 +4,23 @@ description: "Multi-year monitoring of a community microforest in Candiac, Québ
 created: "2024-05-12"
 location: "Candiac, Québec"
 last_activity: "4 hours ago"
+owner: kc
+admins:
+  - mhb
+members:
+  - kc
+  - mhb
+plan: "Research"
+quotas:
+  storage_gb: 100
+  compute_hours: 80
+  seats: 2
+billing:
+  next_invoice: "2026-06-01"
 usage:
   storage_gb: 24.5
   compute_hours_month: 18.5
   monthly_cost: 42
-members:
-  - kc
-  - mhb
 datasets:
   - name: "Biodiversity Census 2024"
     format: "parquet"

@@ -3,18 +3,11 @@ kc:
   initials: "KC"
   role: "Lead scientist"
   email: "kc@fake.io"
-  admin: true
+  sysadmin: true
   bio: "Quantitative ecologist building open-source tools for biodiversity science."
   location: "Sherbrooke, QC"
   timezone: "America/Montreal"
   joined: "2023-04-12"
-  plan: "Research Pro"
-  cost_monthly: 148
-  next_invoice: "2026-06-01"
-  quotas:
-    storage_gb: 250
-    compute_hours: 200
-    seats: 5
   tokens:
     - name: "field-uploader"
       created: "2025-09-12"
@@ -50,13 +43,6 @@ mhb:
   location: "Montréal, QC"
   timezone: "America/Montreal"
   joined: "2024-05-12"
-  plan: "Research"
-  cost_monthly: 49
-  next_invoice: "2026-06-01"
-  quotas:
-    storage_gb: 100
-    compute_hours: 80
-    seats: 2
   tokens:
     - name: "field-import"
       created: "2024-08-30"
@@ -84,13 +70,6 @@ sd:
   location: "Rimouski, QC"
   timezone: "America/Montreal"
   joined: "2023-08-04"
-  plan: "Research Pro"
-  cost_monthly: 219
-  next_invoice: "2026-06-01"
-  quotas:
-    storage_gb: 500
-    compute_hours: 400
-    seats: 5
   tokens:
     - name: "satellite-ingest"
       created: "2024-02-19"

@@ -20,7 +20,7 @@
                     <button id="user-menu-button" type="button" class="inline-flex items-center gap-2 text-sm font-medium text-brand-500 dark:text-accent hover:text-brand-600 dark:hover:opacity-80 transition-colors" aria-haspopup="menu" aria-expanded="false">
                         <span id="user-menu-initials" class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent text-xs font-semibold"></span>
                         <span id="user-display"></span>
-                        <span id="user-menu-admin-badge" class="hidden pill pill-brand text-[10px]">admin</span>
+                        <span id="user-menu-admin-badge" class="hidden pill pill-brand text-[10px]">sysadmin</span>
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div id="user-menu-panel" class="hidden absolute right-0 mt-2 w-56 dropdown-panel py-1">
@@ -140,7 +140,7 @@
         const userId = localStorage.getItem('userId');
         const userName = localStorage.getItem('userName');
         const userFullName = localStorage.getItem('userFullName');
-        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        const isSysAdmin = localStorage.getItem('isSysAdmin') === 'true';
         const loginButton = document.getElementById('login-button');
         const loginButtonMobileBtn = document.getElementById('login-button-mobile');
         const userMenu = document.getElementById('user-menu');
@@ -169,7 +169,7 @@
                     ? parts[0][0] + parts[parts.length - 1][0]
                     : source.slice(0, 2)).toUpperCase();
             }
-            adminBadge?.classList.toggle('hidden', !isAdmin);
+            adminBadge?.classList.toggle('hidden', !isSysAdmin);
             if (projectsLink) projectsLink.href = `/user/${userId}/`;
             if (settingsLink) settingsLink.href = `/user/${userId}/settings/`;
             projectsLinkMobile?.classList.remove('hidden');
@@ -177,7 +177,7 @@
             logoutBtnMobile?.classList.remove('hidden');
             if (projectsLinkMobile) projectsLinkMobile.href = `/user/${userId}/`;
             if (settingsLinkMobile) settingsLinkMobile.href = `/user/${userId}/settings/`;
-            if (isAdmin) {
+            if (isSysAdmin) {
                 if (backOfficeLink) {
                     backOfficeLink.href = `/user/${userId}/back-office/`;
                     backOfficeLink.classList.remove('hidden');
@@ -206,7 +206,7 @@
         localStorage.removeItem('userName');
         localStorage.removeItem('userFullName');
         localStorage.removeItem('userId');
-        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('isSysAdmin');
         window.location.href = '/';
     }
 
@@ -260,24 +260,26 @@
         if (e.target === modal) closeModalFunc();
     });
 
+    {{- $usersByEmail := dict -}}
+    {{- range $userId, $u := .Site.Data.users -}}
+        {{- $entry := dict "userName" $userId "fullName" $u.fullName "userId" $userId "isSysAdmin" (or $u.sysadmin false) -}}
+        {{- $usersByEmail = merge $usersByEmail (dict $u.email $entry) -}}
+    {{- end }}
+    const USERS_BY_EMAIL = {{ $usersByEmail | jsonify | safeJS }};
+    const SHARED_PASSWORD = 'insilecloud';
+
     loginForm?.addEventListener('submit', function (e) {
         e.preventDefault();
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-        const users = {
-            'mhb@fake.io': { password: 'insilecloud', userName: 'mhb', fullName: 'Marie-Helene', userId: 'mhb', isAdmin: false },
-            'kc@fake.io':  { password: 'insilecloud', userName: 'kc',  fullName: 'Kevin',        userId: 'kc',  isAdmin: true  },
-            'sd@fake.io':  { password: 'insilecloud', userName: 'sd',  fullName: 'Steve',        userId: 'sd',  isAdmin: false }
-        };
-
-        const user = users[email];
-        if (user && password === user.password) {
+        const user = USERS_BY_EMAIL[email];
+        if (user && password === SHARED_PASSWORD) {
             localStorage.setItem('userEmail', email);
             localStorage.setItem('userName', user.userName);
             localStorage.setItem('userFullName', user.fullName);
             localStorage.setItem('userId', user.userId);
-            localStorage.setItem('isAdmin', user.isAdmin ? 'true' : 'false');
+            localStorage.setItem('isSysAdmin', user.isSysAdmin ? 'true' : 'false');
             window.location.href = `/user/${user.userId}`;
         } else {
             loginMessage.textContent = 'Invalid credentials. Please try again.';
