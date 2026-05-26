@@ -4,21 +4,21 @@
 <section class="relative overflow-hidden">
     <div class="container mx-auto px-4 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
         <div>
-            <div class="kicker mb-4">Cloud platform · inSileco</div>
+            <div class="kicker mb-4">{{ i18n "home_kicker" }}</div>
             <h1 class="text-5xl md:text-6xl leading-tight mb-6">
-                Your data,<br>
-                <span class="text-brand-500 dark:text-accent">your apps</span>,<br>
-                one workspace.
+                {{ i18n "home_title_1" }}<br>
+                <span class="text-brand-500 dark:text-accent">{{ i18n "home_title_2" }}</span>,<br>
+                {{ i18n "home_title_3" }}
             </h1>
             <div class="accent-rule mb-6"></div>
             <p class="text-lg text-ink-500 dark:text-slate-300 mb-8 max-w-xl">
-                {{ .Site.Params.description }}. Reproducible analytics — from ecology to operations.
+                {{ .Site.Params.description }}. {{ i18n "home_desc_suffix" }}
             </p>
             <div class="flex flex-wrap gap-3">
                 <button onclick="document.getElementById('login-button').click()" class="btn-primary">
-                    Get started
+                    {{ i18n "btn_get_started" }}
                 </button>
-                <a href="/about" class="btn-ghost">Learn more</a>
+                <a href="{{ "/about" | relLangURL }}" class="btn-ghost">{{ i18n "btn_learn_more" }}</a>
             </div>
         </div>
 
@@ -26,15 +26,15 @@
             <div class="surface-card p-8 md:p-10 relative">
                 <div class="absolute -top-3 -left-3 w-20 h-20 rounded-full bg-brand-400/15 blur-2xl"></div>
                 <div class="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-accent/20 blur-2xl"></div>
-                <div class="kicker mb-3">What you get</div>
+                <div class="kicker mb-3">{{ i18n "home_what_you_get" }}</div>
                 <ul class="space-y-4">
                     <li class="flex items-start gap-3">
                         <span class="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         </span>
                         <div>
-                            <div class="font-semibold">Datasets</div>
-                            <div class="text-sm text-muted">Organise and version your data collections.</div>
+                            <div class="font-semibold">{{ i18n "feat_datasets_title" }}</div>
+                            <div class="text-sm text-muted">{{ i18n "feat_datasets_desc" }}</div>
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
@@ -42,8 +42,8 @@
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         </span>
                         <div>
-                            <div class="font-semibold">Reports</div>
-                            <div class="text-sm text-muted">Generate and share reproducible analyses.</div>
+                            <div class="font-semibold">{{ i18n "feat_reports_title" }}</div>
+                            <div class="text-sm text-muted">{{ i18n "feat_reports_desc" }}</div>
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
@@ -51,8 +51,8 @@
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         </span>
                         <div>
-                            <div class="font-semibold">Apps</div>
-                            <div class="text-sm text-muted">Launch interactive tools from one place.</div>
+                            <div class="font-semibold">{{ i18n "feat_apps_title" }}</div>
+                            <div class="text-sm text-muted">{{ i18n "feat_apps_desc" }}</div>
                         </div>
                     </li>
                 </ul>

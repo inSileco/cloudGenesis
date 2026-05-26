@@ -1,0 +1,12 @@
+{{- /* EN · FR switcher — links each language version of the current page */ -}}
+<div class="flex items-center gap-1.5 text-sm font-medium" role="group" aria-label="Language">
+    {{- $cur := .Language.Lang -}}
+    {{- range $i, $t := .AllTranslations -}}
+        {{- if $i }}<span class="text-muted/50" aria-hidden="true">·</span>{{ end -}}
+        {{- if eq $t.Language.Lang $cur -}}
+            <span class="text-brand-500 dark:text-accent font-semibold" aria-current="true">{{ $t.Language.Lang | upper }}</span>
+        {{- else -}}
+            <a href="{{ $t.RelPermalink }}" hreflang="{{ $t.Language.Lang }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">{{ $t.Language.Lang | upper }}</a>
+        {{- end -}}
+    {{- end -}}
+</div>

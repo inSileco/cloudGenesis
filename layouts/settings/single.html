@@ -2,68 +2,68 @@
 
 {{ define "main" }}
 {{ $userId := .Params.userId }}
-{{ $users := .Site.Data.users }}
+{{ $users := (index .Site.Data .Site.Language.Lang).users }}
 {{ $user := index $users $userId }}
 
 <div class="container mx-auto px-4 py-10 max-w-6xl">
     <div class="mb-6">
-        <a href="/user/{{ $userId }}" class="inline-flex items-center gap-2 text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors">
+        <a href="{{ printf "/user/%s" $userId | relLangURL }}" class="inline-flex items-center gap-2 text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Back to projects
+            {{ i18n "back_to_projects" }}
         </a>
     </div>
 
     <div class="mb-8">
-        <div class="kicker mb-2">Settings</div>
-        <h1 class="text-4xl md:text-5xl mb-2">Account settings</h1>
+        <div class="kicker mb-2">{{ i18n "kicker_settings" }}</div>
+        <h1 class="text-4xl md:text-5xl mb-2">{{ i18n "account_settings" }}</h1>
         <div class="accent-rule mb-4"></div>
-        <p class="text-muted">Manage your profile, security and preferences.</p>
+        <p class="text-muted">{{ i18n "settings_subtitle" }}</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8">
         <aside class="hidden lg:block">
             <nav class="sticky top-24 space-y-1">
-                <a href="#profile" class="settings-nav-item">Profile</a>
-                <a href="#security" class="settings-nav-item">Security</a>
-                <a href="#preferences" class="settings-nav-item">Preferences</a>
-                <a href="#sessions" class="settings-nav-item">Sessions</a>
-                <a href="#danger" class="settings-nav-item">Danger zone</a>
+                <a href="#profile" class="settings-nav-item">{{ i18n "nav_profile" }}</a>
+                <a href="#security" class="settings-nav-item">{{ i18n "nav_security" }}</a>
+                <a href="#preferences" class="settings-nav-item">{{ i18n "nav_preferences" }}</a>
+                <a href="#sessions" class="settings-nav-item">{{ i18n "nav_sessions" }}</a>
+                <a href="#danger" class="settings-nav-item">{{ i18n "nav_danger" }}</a>
             </nav>
         </aside>
 
         <div class="space-y-6 scroll-smooth">
             <!-- Profile -->
             <section id="profile" class="surface-card p-6 scroll-mt-24">
-                <div class="kicker mb-2">01 — You</div>
-                <h2 class="text-2xl mb-4">Profile</h2>
+                <div class="kicker mb-2">{{ i18n "kicker_01_you" }}</div>
+                <h2 class="text-2xl mb-4">{{ i18n "profile" }}</h2>
 
                 <div class="flex items-center gap-5 mb-6">
                     <span class="inline-flex h-20 w-20 items-center justify-center rounded-full bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent text-2xl font-bold ring-4 ring-white dark:ring-[#0f172a]">{{ $user.initials }}</span>
                     <div>
                         <div class="text-lg font-semibold">{{ $user.fullName }}</div>
-                        <div class="text-sm text-muted">{{ $user.role }} · joined {{ $user.joined }}</div>
+                        <div class="text-sm text-muted">{{ $user.role }} · {{ i18n "label_joined" }} {{ $user.joined }}</div>
                     </div>
                 </div>
 
-                <form class="grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="event.preventDefault(); notify('Profile updated.', 'success');">
+                <form class="grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="event.preventDefault(); notify({{ i18n "notif_profile_updated" }}, 'success');">
                     <div>
-                        <label class="block text-sm font-medium mb-1">Full name</label>
+                        <label class="block text-sm font-medium mb-1">{{ i18n "label_full_name" }}</label>
                         <input type="text" class="input-field" value="{{ $user.fullName }}">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">Email</label>
+                        <label class="block text-sm font-medium mb-1">{{ i18n "label_email" }}</label>
                         <input type="email" class="input-field" value="{{ $user.email }}" readonly>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">Role</label>
+                        <label class="block text-sm font-medium mb-1">{{ i18n "label_role" }}</label>
                         <input type="text" class="input-field" value="{{ $user.role }}">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">Location</label>
+                        <label class="block text-sm font-medium mb-1">{{ i18n "label_location" }}</label>
                         <input type="text" class="input-field" value="{{ $user.location }}">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">Time zone</label>
+                        <label class="block text-sm font-medium mb-1">{{ i18n "label_timezone" }}</label>
                         <select class="input-field">
                             <option {{ if eq $user.timezone "America/Montreal" }}selected{{ end }}>America/Montreal</option>
                             <option {{ if eq $user.timezone "America/Toronto" }}selected{{ end }}>America/Toronto</option>
@@ -72,63 +72,63 @@
                         </select>
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium mb-1">Bio</label>
+                        <label class="block text-sm font-medium mb-1">{{ i18n "label_bio" }}</label>
                         <textarea class="input-field" rows="3">{{ $user.bio }}</textarea>
                     </div>
                     <div class="md:col-span-2 flex justify-end">
-                        <button type="submit" class="btn-primary">Save changes</button>
+                        <button type="submit" class="btn-primary">{{ i18n "btn_save_changes" }}</button>
                     </div>
                 </form>
             </section>
 
             <!-- Security -->
             <section id="security" class="surface-card p-6 scroll-mt-24">
-                <div class="kicker mb-2">02 — Security</div>
-                <h2 class="text-2xl mb-4">Security</h2>
+                <div class="kicker mb-2">{{ i18n "kicker_02_security" }}</div>
+                <h2 class="text-2xl mb-4">{{ i18n "security" }}</h2>
 
                 <div class="mb-8">
-                    <h3 class="font-semibold mb-3">Change password</h3>
-                    <form class="grid grid-cols-1 md:grid-cols-3 gap-4" onsubmit="event.preventDefault(); notify('Password updated.', 'success');">
+                    <h3 class="font-semibold mb-3">{{ i18n "change_password" }}</h3>
+                    <form class="grid grid-cols-1 md:grid-cols-3 gap-4" onsubmit="event.preventDefault(); notify({{ i18n "notif_password_updated" }}, 'success');">
                         <div>
-                            <label class="block text-sm font-medium mb-1">Current</label>
+                            <label class="block text-sm font-medium mb-1">{{ i18n "label_current" }}</label>
                             <input type="password" class="input-field" placeholder="••••••••">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">New</label>
+                            <label class="block text-sm font-medium mb-1">{{ i18n "label_new" }}</label>
                             <input type="password" class="input-field" placeholder="••••••••">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">Confirm</label>
+                            <label class="block text-sm font-medium mb-1">{{ i18n "label_confirm" }}</label>
                             <input type="password" class="input-field" placeholder="••••••••">
                         </div>
                         <div class="md:col-span-3 flex justify-end">
-                            <button type="submit" class="btn-primary">Update password</button>
+                            <button type="submit" class="btn-primary">{{ i18n "btn_update_password" }}</button>
                         </div>
                     </form>
                 </div>
 
                 <div class="mb-8 surface-soft p-4 flex items-center justify-between gap-4">
                     <div>
-                        <div class="font-semibold">Two-factor authentication</div>
-                        <div class="text-sm text-muted">Currently disabled. Add an authenticator app for an extra layer of security.</div>
+                        <div class="font-semibold">{{ i18n "twofa_title" }}</div>
+                        <div class="text-sm text-muted">{{ i18n "twofa_desc" }}</div>
                     </div>
-                    <button class="btn-ghost" onclick="notify('2FA setup would open here.', 'info');">Set up 2FA</button>
+                    <button class="btn-ghost" onclick="notify({{ i18n "notif_2fa" }}, 'info');">{{ i18n "btn_setup_2fa" }}</button>
                 </div>
 
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <h3 class="font-semibold">API tokens</h3>
-                        <button class="btn-primary" onclick="notify('Token created — copy it before closing.', 'success');">+ Create token</button>
+                        <h3 class="font-semibold">{{ i18n "api_tokens" }}</h3>
+                        <button class="btn-primary" onclick="notify({{ i18n "notif_token_created" }}, 'success');">{{ i18n "btn_create_token" }}</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-[var(--color-surface-border)] dark:border-white/10">
-                                    <th class="py-2 pr-4">Name</th>
-                                    <th class="py-2 pr-4">Scope</th>
-                                    <th class="py-2 pr-4">Created</th>
-                                    <th class="py-2 pr-4">Last used</th>
-                                    <th class="py-2">Actions</th>
+                                    <th class="py-2 pr-4">{{ i18n "th_name" }}</th>
+                                    <th class="py-2 pr-4">{{ i18n "th_scope" }}</th>
+                                    <th class="py-2 pr-4">{{ i18n "th_created" }}</th>
+                                    <th class="py-2 pr-4">{{ i18n "th_last_used" }}</th>
+                                    <th class="py-2">{{ i18n "th_actions" }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -139,7 +139,7 @@
                                     <td class="py-2 pr-4">{{ .created }}</td>
                                     <td class="py-2 pr-4">{{ .last_used }}</td>
                                     <td class="py-2">
-                                        <button class="text-sm text-red-600 hover:underline" onclick="notify('Token revoked.', 'warning');">Revoke</button>
+                                        <button class="text-sm text-red-600 hover:underline" onclick="notify({{ i18n "notif_token_revoked" }}, 'warning');">{{ i18n "btn_revoke" }}</button>
                                     </td>
                                 </tr>
                                 {{ end }}
@@ -151,37 +151,37 @@
 
             <!-- Preferences -->
             <section id="preferences" class="surface-card p-6 scroll-mt-24">
-                <div class="kicker mb-2">03 — Preferences</div>
-                <h2 class="text-2xl mb-4">Preferences</h2>
+                <div class="kicker mb-2">{{ i18n "kicker_03_preferences" }}</div>
+                <h2 class="text-2xl mb-4">{{ i18n "preferences" }}</h2>
 
                 <div class="mb-6">
-                    <h3 class="font-semibold mb-3">Appearance</h3>
+                    <h3 class="font-semibold mb-3">{{ i18n "appearance" }}</h3>
                     <div class="flex flex-wrap gap-2" role="radiogroup" id="theme-picker">
-                        <button type="button" data-theme="light" class="btn-ghost theme-option">Light</button>
-                        <button type="button" data-theme="dark" class="btn-ghost theme-option">Dark</button>
-                        <button type="button" data-theme="system" class="btn-ghost theme-option">System</button>
+                        <button type="button" data-theme="light" class="btn-ghost theme-option">{{ i18n "theme_light" }}</button>
+                        <button type="button" data-theme="dark" class="btn-ghost theme-option">{{ i18n "theme_dark" }}</button>
+                        <button type="button" data-theme="system" class="btn-ghost theme-option">{{ i18n "theme_system" }}</button>
                     </div>
                 </div>
 
                 <div class="mb-6">
-                    <h3 class="font-semibold mb-3">Email notifications</h3>
+                    <h3 class="font-semibold mb-3">{{ i18n "email_notifications" }}</h3>
                     <ul class="space-y-3">
-                        {{ range slice (dict "label" "Automation failures" "on" true) (dict "label" "New members" "on" true) (dict "label" "Weekly digest" "on" false) (dict "label" "Mentions in comments" "on" true) }}
+                        {{ range slice (dict "label" (i18n "pref_automation_failures") "on" true) (dict "label" (i18n "pref_new_members") "on" true) (dict "label" (i18n "pref_weekly_digest") "on" false) (dict "label" (i18n "pref_mentions") "on" true) }}
                         <li class="flex items-center justify-between gap-4 surface-soft p-3">
                             <span class="text-sm">{{ .label }}</span>
-                            <button type="button" class="toggle-switch {{ if .on }}on{{ end }}" onclick="this.classList.toggle('on'); notify('Preference saved.', 'success', 1500);" aria-label="Toggle"></button>
+                            <button type="button" class="toggle-switch {{ if .on }}on{{ end }}" onclick="this.classList.toggle('on'); notify({{ i18n "notif_pref_saved" }}, 'success', 1500);" aria-label="{{ i18n "theme_toggle_aria" }}"></button>
                         </li>
                         {{ end }}
                     </ul>
                 </div>
 
                 <div>
-                    <h3 class="font-semibold mb-3">In-app notifications</h3>
+                    <h3 class="font-semibold mb-3">{{ i18n "inapp_notifications" }}</h3>
                     <ul class="space-y-3">
-                        {{ range slice (dict "label" "Automation status changes" "on" true) (dict "label" "Dataset uploads" "on" true) (dict "label" "Report comments" "on" false) }}
+                        {{ range slice (dict "label" (i18n "pref_automation_status") "on" true) (dict "label" (i18n "pref_dataset_uploads") "on" true) (dict "label" (i18n "pref_report_comments") "on" false) }}
                         <li class="flex items-center justify-between gap-4 surface-soft p-3">
                             <span class="text-sm">{{ .label }}</span>
-                            <button type="button" class="toggle-switch {{ if .on }}on{{ end }}" onclick="this.classList.toggle('on'); notify('Preference saved.', 'success', 1500);" aria-label="Toggle"></button>
+                            <button type="button" class="toggle-switch {{ if .on }}on{{ end }}" onclick="this.classList.toggle('on'); notify({{ i18n "notif_pref_saved" }}, 'success', 1500);" aria-label="{{ i18n "theme_toggle_aria" }}"></button>
                         </li>
                         {{ end }}
                     </ul>
@@ -190,19 +190,19 @@
 
             <!-- Sessions -->
             <section id="sessions" class="surface-card p-6 scroll-mt-24">
-                <div class="kicker mb-2">04 — Sessions</div>
+                <div class="kicker mb-2">{{ i18n "kicker_04_sessions" }}</div>
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl">Active sessions</h2>
-                    <button class="btn-ghost" onclick="notify('Signed out from all other devices.', 'warning');">Sign out everywhere</button>
+                    <h2 class="text-2xl">{{ i18n "active_sessions" }}</h2>
+                    <button class="btn-ghost" onclick="notify({{ i18n "notif_signed_out_all" }}, 'warning');">{{ i18n "btn_signout_everywhere" }}</button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-[var(--color-surface-border)] dark:border-white/10">
-                                <th class="py-2 pr-4">Device</th>
-                                <th class="py-2 pr-4">Location</th>
-                                <th class="py-2 pr-4">Last active</th>
-                                <th class="py-2">Status</th>
+                                <th class="py-2 pr-4">{{ i18n "th_device" }}</th>
+                                <th class="py-2 pr-4">{{ i18n "label_location" }}</th>
+                                <th class="py-2 pr-4">{{ i18n "th_last_active" }}</th>
+                                <th class="py-2">{{ i18n "label_status" }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -213,9 +213,9 @@
                                 <td class="py-2 pr-4">{{ .last_active }}</td>
                                 <td class="py-2">
                                     {{ if .current }}
-                                    <span class="pill pill-success">Current</span>
+                                    <span class="pill pill-success">{{ i18n "session_current" }}</span>
                                     {{ else }}
-                                    <button class="text-sm text-red-600 hover:underline" onclick="notify('Session revoked.', 'warning');">Revoke</button>
+                                    <button class="text-sm text-red-600 hover:underline" onclick="notify({{ i18n "notif_session_revoked" }}, 'warning');">{{ i18n "btn_revoke" }}</button>
                                     {{ end }}
                                 </td>
                             </tr>
@@ -227,22 +227,22 @@
 
             <!-- Danger zone -->
             <section id="danger" class="surface-card p-6 border-red-200 dark:border-red-900/40 scroll-mt-24">
-                <div class="kicker mb-2" style="color:#dc2626">05 — Danger zone</div>
-                <h2 class="text-2xl mb-4">Danger zone</h2>
+                <div class="kicker mb-2" style="color:#dc2626">{{ i18n "kicker_05_danger" }}</div>
+                <h2 class="text-2xl mb-4">{{ i18n "danger_zone" }}</h2>
                 <div class="space-y-3">
                     <div class="flex items-center justify-between gap-4 surface-soft p-4">
                         <div>
-                            <div class="font-semibold">Export account data</div>
-                            <div class="text-sm text-muted">Download a copy of every dataset, report and automation run you have access to.</div>
+                            <div class="font-semibold">{{ i18n "export_account_data" }}</div>
+                            <div class="text-sm text-muted">{{ i18n "export_account_desc" }}</div>
                         </div>
-                        <button class="btn-ghost" onclick="notify('Export queued. You will receive an email when ready.', 'info');">Export</button>
+                        <button class="btn-ghost" onclick="notify({{ i18n "notif_export_queued" }}, 'info');">{{ i18n "btn_export" }}</button>
                     </div>
                     <div class="flex items-center justify-between gap-4 p-4 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50/60 dark:bg-red-900/10">
                         <div>
-                            <div class="font-semibold text-red-700 dark:text-red-300">Deactivate account</div>
-                            <div class="text-sm text-muted">Revokes all access and removes you from every project. This is irreversible.</div>
+                            <div class="font-semibold text-red-700 dark:text-red-300">{{ i18n "deactivate_account" }}</div>
+                            <div class="text-sm text-muted">{{ i18n "deactivate_desc" }}</div>
                         </div>
-                        <button class="btn-ghost" style="border-color:#dc2626;color:#dc2626" onclick="notify('Deactivation flow would start here.', 'error');">Deactivate</button>
+                        <button class="btn-ghost" style="border-color:#dc2626;color:#dc2626" onclick="notify({{ i18n "notif_deactivation" }}, 'error');">{{ i18n "btn_deactivate" }}</button>
                     </div>
                 </div>
             </section>
@@ -301,12 +301,12 @@ function notify(message, type = 'info', duration = 2500) {
                 document.documentElement.classList.toggle('dark', theme === 'dark');
             }
             apply(theme);
-            notify('Theme updated.', 'success', 1500);
+            notify({{ i18n "notif_theme_updated" }}, 'success', 1500);
         });
     });
 })();
 
 const userEmail = localStorage.getItem('userEmail');
-if (!userEmail) window.location.href = '/';
+if (!userEmail) window.location.href = LANG_PREFIX;
 </script>
 {{ end }}

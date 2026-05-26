@@ -1,8 +1,9 @@
 {{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
 
 {{ define "main" }}
-{{ $projects := .Site.Data.projects }}
-{{ $users := .Site.Data.users }}
+{{ $data := index .Site.Data .Site.Language.Lang }}
+{{ $projects := $data.projects }}
+{{ $users := $data.users }}
 
 {{/* Aggregate platform-wide stats */}}
 {{ $totalStorageUsed := 0.0 }}
@@ -34,31 +35,31 @@
 <div class="container mx-auto px-4 py-10 max-w-7xl">
     <div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
-            <div class="kicker mb-2">Back office</div>
-            <h1 class="text-4xl md:text-5xl mb-2">Platform overview</h1>
+            <div class="kicker mb-2">{{ i18n "kicker_back_office" }}</div>
+            <h1 class="text-4xl md:text-5xl mb-2">{{ i18n "platform_overview" }}</h1>
             <div class="accent-rule mb-4"></div>
-            <p class="text-muted">Sysadmin dashboard — search projects, monitor resources and platform health.</p>
+            <p class="text-muted">{{ i18n "back_office_subtitle" }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            <span class="pill pill-success">sysadmin</span>
-            <span class="pill pill-brand">all systems normal</span>
+            <span class="pill pill-success">{{ i18n "badge_sysadmin" }}</span>
+            <span class="pill pill-brand">{{ i18n "badge_all_normal" }}</span>
         </div>
     </div>
 
     <!-- Platform KPIs -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="kpi-card">
-            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">Projects</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">{{ i18n "kpi_projects" }}</div>
             <div class="text-3xl font-bold">{{ $projectCount }}</div>
-            <div class="text-xs text-muted mt-1">across the platform</div>
+            <div class="text-xs text-muted mt-1">{{ i18n "kpi_across_platform" }}</div>
         </div>
         <div class="kpi-card">
-            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">Users</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">{{ i18n "kpi_users" }}</div>
             <div class="text-3xl font-bold">{{ $userCount }}</div>
-            <div class="text-xs text-muted mt-1">{{ $sysadminCount }} sysadmin{{ if ne $sysadminCount 1 }}s{{ end }}</div>
+            <div class="text-xs text-muted mt-1">{{ i18n "sysadmins_count" $sysadminCount }}</div>
         </div>
         <div class="kpi-card">
-            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">Storage</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">{{ i18n "kpi_storage" }}</div>
             <div class="text-3xl font-bold">{{ printf "%.1f" $totalStorageUsed }} <span class="text-base font-medium text-muted">/ {{ printf "%.0f" $totalStorageQuota }} GB</span></div>
             {{ $sp := 0 }}{{ if gt $totalStorageQuota 0.0 }}{{ $sp = mul (div $totalStorageUsed $totalStorageQuota) 100 }}{{ end }}
             <div class="progress mt-2 {{ if gt $sp 85.0 }}danger{{ else if gt $sp 70.0 }}warn{{ end }}">
@@ -66,7 +67,7 @@
             </div>
         </div>
         <div class="kpi-card">
-            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">Compute this month</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">{{ i18n "kpi_compute" }}</div>
             <div class="text-3xl font-bold">{{ printf "%.1f" $totalComputeUsed }} <span class="text-base font-medium text-muted">/ {{ printf "%.0f" $totalComputeQuota }} h</span></div>
             {{ $cp := 0 }}{{ if gt $totalComputeQuota 0.0 }}{{ $cp = mul (div $totalComputeUsed $totalComputeQuota) 100 }}{{ end }}
             <div class="progress mt-2 {{ if gt $cp 85.0 }}danger{{ else if gt $cp 70.0 }}warn{{ end }}">
@@ -79,30 +80,30 @@
     <div class="surface-card p-6 mb-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
-                <div class="kicker">Projects</div>
-                <h2 class="text-2xl mt-1">All projects</h2>
+                <div class="kicker">{{ i18n "kpi_projects" }}</div>
+                <h2 class="text-2xl mt-1">{{ i18n "all_projects" }}</h2>
             </div>
             <div class="flex items-center gap-2">
                 <div class="relative">
                     <svg class="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
-                    <input id="project-search" type="search" placeholder="Search projects, owners, plans…" class="input-field pl-9 w-72" />
+                    <input id="project-search" type="search" placeholder="{{ i18n "search_projects_placeholder" }}" class="input-field pl-9 w-72" />
                 </div>
-                <span id="project-count" class="text-xs text-muted whitespace-nowrap">{{ $projectCount }} total</span>
+                <span id="project-count" class="text-xs text-muted whitespace-nowrap">{{ $projectCount }} {{ i18n "total" }}</span>
             </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-[var(--color-surface-border)] dark:border-white/10">
-                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="name">Project</th>
-                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="owner">Owner</th>
-                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="plan">Plan</th>
-                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="members">Members</th>
-                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="storage">Storage</th>
-                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="compute">Compute</th>
-                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="cost">$/month</th>
-                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="activity">Last activity</th>
-                        <th class="py-2">Actions</th>
+                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="name">{{ i18n "th_project" }}</th>
+                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="owner">{{ i18n "th_owner" }}</th>
+                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="plan">{{ i18n "th_plan" }}</th>
+                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="members">{{ i18n "th_members" }}</th>
+                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="storage">{{ i18n "th_storage" }}</th>
+                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="compute">{{ i18n "th_compute" }}</th>
+                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="cost">{{ i18n "th_cost" }}</th>
+                        <th class="py-2 pr-4 cursor-pointer hover:text-brand-500 dark:hover:text-accent" data-sort="activity">{{ i18n "th_last_activity" }}</th>
+                        <th class="py-2">{{ i18n "th_actions" }}</th>
                     </tr>
                 </thead>
                 <tbody id="project-tbody">
@@ -126,7 +127,7 @@
                         data-cost="{{ $cost }}"
                         data-activity="{{ $project.last_activity }}">
                         <td class="py-3 pr-4">
-                            <a href="/user/{{ $ownerId }}/project/{{ $projectId }}/" class="font-medium hover:text-brand-500 dark:hover:text-accent">{{ $project.name }}</a>
+                            <a href="{{ printf "/user/%s/project/%s/" $ownerId $projectId | relLangURL }}" class="font-medium hover:text-brand-500 dark:hover:text-accent">{{ $project.name }}</a>
                             <div class="text-xs text-muted">{{ $project.short_description }}</div>
                         </td>
                         <td class="py-3 pr-4">
@@ -155,32 +156,32 @@
                         <td class="py-3 pr-4 text-muted">{{ $project.last_activity }}</td>
                         <td class="py-3">
                             <div class="flex gap-2">
-                                <a href="/user/{{ $ownerId }}/project/{{ $projectId }}/settings/" class="text-sm text-brand-500 hover:underline dark:text-accent">Manage</a>
-                                <button class="text-sm text-muted hover:text-red-600" onclick="notify('Project would be archived.', 'warning');">Archive</button>
+                                <a href="{{ printf "/user/%s/project/%s/settings/" $ownerId $projectId | relLangURL }}" class="text-sm text-brand-500 hover:underline dark:text-accent">{{ i18n "btn_manage" }}</a>
+                                <button class="text-sm text-muted hover:text-red-600" onclick="notify({{ i18n "notif_project_archived" }}, 'warning');">{{ i18n "btn_archive" }}</button>
                             </div>
                         </td>
                     </tr>
                     {{ end }}
                 </tbody>
             </table>
-            <p id="project-empty" class="hidden text-center text-sm text-muted py-6">No projects match that search.</p>
+            <p id="project-empty" class="hidden text-center text-sm text-muted py-6">{{ i18n "no_projects_match" }}</p>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <!-- System health -->
         <div class="surface-card p-6">
-            <div class="kicker mb-2">Status</div>
-            <h2 class="text-xl mb-4">System health</h2>
+            <div class="kicker mb-2">{{ i18n "status_kicker" }}</div>
+            <h2 class="text-xl mb-4">{{ i18n "system_health" }}</h2>
             <ul class="space-y-3 text-sm">
-                {{ range slice (dict "name" "Cloud storage" "status" "ok") (dict "name" "Automations" "status" "ok") (dict "name" "API" "status" "ok") (dict "name" "Reports" "status" "warn" "note" "elevated latency") (dict "name" "Apps" "status" "ok") }}
+                {{ range slice (dict "name" (i18n "health_cloud_storage") "status" "ok") (dict "name" (i18n "health_automations") "status" "ok") (dict "name" (i18n "health_api") "status" "ok") (dict "name" (i18n "health_reports") "status" "warn" "note" (i18n "health_elevated_latency")) (dict "name" (i18n "health_apps") "status" "ok") }}
                 <li class="flex items-center justify-between">
                     <span class="flex items-center gap-2">
                         <span class="status-dot {{ .status }}"></span>
                         {{ .name }}
                     </span>
                     <span class="text-xs {{ if eq .status "ok" }}text-emerald-600 dark:text-emerald-400{{ else if eq .status "warn" }}text-amber-600 dark:text-amber-400{{ else }}text-red-600 dark:text-red-400{{ end }}">
-                        {{ if eq .status "ok" }}operational{{ else if eq .status "warn" }}{{ .note }}{{ else }}down{{ end }}
+                        {{ if eq .status "ok" }}{{ i18n "health_operational" }}{{ else if eq .status "warn" }}{{ .note }}{{ else }}{{ i18n "health_down" }}{{ end }}
                     </span>
                 </li>
                 {{ end }}
@@ -189,10 +190,10 @@
 
         <!-- Aggregate billing -->
         <div class="surface-card p-6">
-            <div class="kicker mb-2">Revenue</div>
-            <h2 class="text-xl mb-4">Monthly total</h2>
+            <div class="kicker mb-2">{{ i18n "revenue" }}</div>
+            <h2 class="text-xl mb-4">{{ i18n "monthly_total" }}</h2>
             <div class="text-4xl font-bold mb-2">${{ $totalMonthlyCost }}</div>
-            <div class="text-xs text-muted mb-4">across {{ $projectCount }} project{{ if ne $projectCount 1 }}s{{ end }}</div>
+            <div class="text-xs text-muted mb-4">{{ i18n "across_count" $projectCount }}</div>
             <div class="space-y-2 text-sm">
                 {{ range $projectId, $project := $projects }}
                 <div class="flex items-center justify-between">
@@ -205,10 +206,10 @@
 
         <!-- Seats -->
         <div class="surface-card p-6">
-            <div class="kicker mb-2">Capacity</div>
-            <h2 class="text-xl mb-4">Seats</h2>
+            <div class="kicker mb-2">{{ i18n "capacity" }}</div>
+            <h2 class="text-xl mb-4">{{ i18n "seats" }}</h2>
             <div class="text-4xl font-bold mb-2">{{ $totalSeatsUsed }} <span class="text-base font-medium text-muted">/ {{ $totalSeatsQuota }}</span></div>
-            <div class="text-xs text-muted mb-4">total memberships across all projects</div>
+            <div class="text-xs text-muted mb-4">{{ i18n "seats_subtitle" }}</div>
             {{ $seatsPct := 0 }}{{ if gt $totalSeatsQuota 0 }}{{ $seatsPct = mul (div (float $totalSeatsUsed) (float $totalSeatsQuota)) 100 }}{{ end }}
             <div class="progress {{ if gt $seatsPct 85.0 }}danger{{ else if gt $seatsPct 70.0 }}warn{{ end }}">
                 <div class="bar" style="width: {{ printf "%.0f" $seatsPct }}%"></div>
@@ -220,20 +221,20 @@
     <div class="surface-card p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <div class="kicker">People</div>
-                <h2 class="text-2xl mt-1">All users</h2>
+                <div class="kicker">{{ i18n "people" }}</div>
+                <h2 class="text-2xl mt-1">{{ i18n "all_users" }}</h2>
             </div>
-            <button class="btn-primary" onclick="notify('Invite dialog would open here.', 'info');">+ Invite user</button>
+            <button class="btn-primary" onclick="notify({{ i18n "notif_invite_dialog" }}, 'info');">{{ i18n "btn_invite_user" }}</button>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-[var(--color-surface-border)] dark:border-white/10">
-                        <th class="py-2 pr-4">User</th>
-                        <th class="py-2 pr-4">Role</th>
-                        <th class="py-2 pr-4">Projects</th>
-                        <th class="py-2 pr-4">Joined</th>
-                        <th class="py-2">Sysadmin</th>
+                        <th class="py-2 pr-4">{{ i18n "th_user" }}</th>
+                        <th class="py-2 pr-4">{{ i18n "label_role" }}</th>
+                        <th class="py-2 pr-4">{{ i18n "th_projects" }}</th>
+                        <th class="py-2 pr-4">{{ i18n "th_joined" }}</th>
+                        <th class="py-2">{{ i18n "th_sysadmin" }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -254,7 +255,7 @@
                         <td class="py-3 pr-4 text-muted">{{ delimit $userProjects ", " }}</td>
                         <td class="py-3 pr-4 text-muted">{{ $u.joined }}</td>
                         <td class="py-3">
-                            {{ if $u.sysadmin }}<span class="pill pill-success">yes</span>{{ else }}<span class="text-xs text-muted">—</span>{{ end }}
+                            {{ if $u.sysadmin }}<span class="pill pill-success">{{ i18n "yes" }}</span>{{ else }}<span class="text-xs text-muted">—</span>{{ end }}
                         </td>
                     </tr>
                     {{ end }}
@@ -297,6 +298,7 @@ function notify(message, type = 'info', duration = 2500) {
     const counter = document.getElementById('project-count');
     const rows = Array.from(tbody.querySelectorAll('.project-row'));
     const total = rows.length;
+    const TOTAL_WORD = {{ i18n "total" }};
 
     function applyFilter() {
         const q = (input.value || '').trim().toLowerCase();
@@ -313,8 +315,8 @@ function notify(message, type = 'info', duration = 2500) {
         });
         empty.classList.toggle('hidden', visible !== 0);
         counter.textContent = visible === total
-            ? `${total} total`
-            : `${visible} of ${total}`;
+            ? `${total} ${TOTAL_WORD}`
+            : {{ i18n "results_of_total" (dict "Visible" "{v}" "Total" "{t}") }}.replace('{v}', visible).replace('{t}', total);
     }
     input?.addEventListener('input', applyFilter);
 
@@ -339,10 +341,10 @@ function notify(message, type = 'info', duration = 2500) {
 const userEmail = localStorage.getItem('userEmail');
 const isSysAdmin = localStorage.getItem('isSysAdmin') === 'true';
 if (!userEmail) {
-    window.location.href = '/';
+    window.location.href = LANG_PREFIX;
 } else if (!isSysAdmin) {
     const uid = localStorage.getItem('userId');
-    window.location.href = uid ? `/user/${uid}/` : '/';
+    window.location.href = uid ? `${LANG_PREFIX}user/${uid}/` : LANG_PREFIX;
 }
 </script>
 {{ end }}

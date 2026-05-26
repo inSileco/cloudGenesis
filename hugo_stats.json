@@ -303,6 +303,7 @@
       "text-left",
       "text-lg",
       "text-muted",
+      "text-muted/50",
       "text-red-600",
       "text-red-700",
       "text-sm",
@@ -385,7 +386,8 @@
       "user-menu-button",
       "user-menu-initials",
       "user-menu-panel",
-      "welcome-message"
+      "welcome-message",
+      "à-propos-dinsilecloud"
     ]
   }
 }

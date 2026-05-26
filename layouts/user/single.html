@@ -2,25 +2,26 @@
 
 {{ define "main" }}
 {{ $userId := .Params.userId }}
-{{ $users := .Site.Data.users }}
+{{ $data := index .Site.Data .Site.Language.Lang }}
+{{ $users := $data.users }}
 {{ $userMeta := index $users $userId }}
 
 <div class="container mx-auto px-4 py-10">
     <div class="mb-10">
-        <div class="kicker mb-2">Workspace</div>
-        <h1 class="text-4xl md:text-5xl mb-2" id="welcome-message">Welcome to your workspace</h1>
+        <div class="kicker mb-2">{{ i18n "kicker_workspace" }}</div>
+        <h1 class="text-4xl md:text-5xl mb-2" id="welcome-message">{{ i18n "welcome_workspace" }}</h1>
         <div class="accent-rule mb-4"></div>
-        <p class="text-muted">Pick a project to access its datasets, reports and apps.</p>
+        <p class="text-muted">{{ i18n "workspace_pick" }}</p>
     </div>
 
     <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl">Your projects</h2>
+        <h2 class="text-2xl">{{ i18n "your_projects" }}</h2>
         <span class="text-sm text-muted" id="project-count"></span>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="project-grid">
         {{ $hasProject := false }}
-        {{ range $projectId, $project := .Site.Data.projects }}
+        {{ range $projectId, $project := $data.projects }}
             {{ if in $project.members $userId }}
                 {{ $hasProject = true }}
                 {{ $datasetCount := len $project.datasets }}
@@ -28,10 +29,10 @@
                 {{ $appCount := len $project.apps }}
                 {{ $automationCount := len $project.automations }}
                 {{ $memberCount := len $project.members }}
-                <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
+                <a href="{{ printf "/user/%s/project/%s" $userId $projectId | relLangURL }}" class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
                     <div class="flex items-start justify-between mb-3">
                         <div>
-                            <div class="kicker">Project</div>
+                            <div class="kicker">{{ i18n "kicker_project" }}</div>
                             <h3 class="text-xl mt-1 group-hover:text-brand-500 dark:group-hover:text-accent transition-colors">{{ $project.name }}</h3>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
@@ -41,10 +42,10 @@
                     <p class="text-sm text-muted mb-4 line-clamp-2">{{ $project.short_description }}</p>
 
                     <div class="flex flex-wrap gap-2 mb-4">
-                        <span class="pill pill-brand">{{ $datasetCount }} datasets</span>
-                        <span class="pill pill-brand">{{ $reportCount }} reports</span>
-                        <span class="pill pill-brand">{{ $automationCount }} automations</span>
-                        <span class="pill pill-brand">{{ $appCount }} apps</span>
+                        <span class="pill pill-brand">{{ i18n "datasets_count" $datasetCount }}</span>
+                        <span class="pill pill-brand">{{ i18n "reports_count" $reportCount }}</span>
+                        <span class="pill pill-brand">{{ i18n "automations_count" $automationCount }}</span>
+                        <span class="pill pill-brand">{{ i18n "apps_count" $appCount }}</span>
                     </div>
 
                     <div class="flex items-center justify-between pt-3 border-t border-[var(--color-surface-border)] dark:border-white/10">
@@ -54,7 +55,7 @@
                                 <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent text-xs font-semibold ring-2 ring-white dark:ring-[#0f172a]" title="{{ $member.fullName }}">{{ $member.initials }}</span>
                             {{ end }}
                         </div>
-                        <span class="text-xs text-muted">{{ $memberCount }} member{{ if ne $memberCount 1 }}s{{ end }}</span>
+                        <span class="text-xs text-muted">{{ i18n "members_count" $memberCount }}</span>
                     </div>
                 </a>
             {{ end }}
@@ -62,9 +63,9 @@
 
         {{ if not $hasProject }}
         <div class="md:col-span-2 lg:col-span-3 surface-card p-10 text-center">
-            <div class="kicker mb-2">Empty workspace</div>
-            <h3 class="text-xl mb-2">No projects yet</h3>
-            <p class="text-muted">You are not a member of any project. Ask an administrator to add you to one.</p>
+            <div class="kicker mb-2">{{ i18n "empty_workspace" }}</div>
+            <h3 class="text-xl mb-2">{{ i18n "no_projects_title" }}</h3>
+            <p class="text-muted">{{ i18n "no_projects_desc" }}</p>
         </div>
         {{ end }}
     </div>
@@ -74,14 +75,14 @@
     const userFullName = localStorage.getItem('userFullName');
     const welcomeMessage = document.getElementById('welcome-message');
     if (userFullName && welcomeMessage) {
-        welcomeMessage.innerHTML = `Hello <span class="text-brand-500 dark:text-accent">${userFullName}</span>`;
+        welcomeMessage.innerHTML = `{{ i18n "welcome_hello" }} <span class="text-brand-500 dark:text-accent">${userFullName}</span>`;
     }
     const userEmail = localStorage.getItem('userEmail');
-    if (!userEmail) window.location.href = '/';
+    if (!userEmail) window.location.href = LANG_PREFIX;
 
     const grid = document.getElementById('project-grid');
     const count = grid?.querySelectorAll('a').length || 0;
     const countEl = document.getElementById('project-count');
-    if (countEl) countEl.textContent = count + ' active';
+    if (countEl) countEl.textContent = count + ' ' + {{ i18n "active" }};
 </script>
 {{ end }}

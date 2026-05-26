@@ -1,9 +1,26 @@
 baseURL = 'https://example.org/'
-languageCode = 'en-us'
 title = 'inSileCloud'
 
-[params]
-description = 'Get access to your data and apps'
+defaultContentLanguage = 'en'
+defaultContentLanguageInSubdir = false
 
 [build]
 writeStats = true
+
+[languages]
+  [languages.en]
+    languageCode = 'en-us'
+    languageName = 'English'
+    contentDir = 'content/en'
+    weight = 1
+    title = 'inSileCloud'
+    [languages.en.params]
+      description = 'Get access to your data and apps'
+  [languages.fr]
+    languageCode = 'fr-CA'
+    languageName = 'Français'
+    contentDir = 'content/fr'
+    weight = 2
+    title = 'inSileCloud'
+    [languages.fr.params]
+      description = 'Accédez à vos données et à vos applications'

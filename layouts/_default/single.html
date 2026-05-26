@@ -2,7 +2,7 @@
 
 {{ define "main" }}
 <article class="container mx-auto px-4 py-10 max-w-3xl">
-    <div class="kicker mb-2">Article</div>
+    <div class="kicker mb-2">{{ i18n "kicker_article" }}</div>
     <h1 class="text-4xl md:text-5xl mb-3">{{ .Title }}</h1>
     <div class="accent-rule mb-4"></div>
     <div class="text-sm text-muted mb-8">{{ .Date.Format "January 2, 2006" }}</div>

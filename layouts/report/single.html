@@ -4,7 +4,8 @@
 {{ $userId := .Params.userId }}
 {{ $projectId := .Params.projectId }}
 {{ $reportId := .Params.reportId }}
-{{ $project := index .Site.Data.projects $projectId }}
+{{ $data := index .Site.Data .Site.Language.Lang }}
+{{ $project := index $data.projects $projectId }}
 {{ $reports := $project.reports }}
 {{ $filteredReports := where $reports "id" $reportId }}
 {{ $report := index $filteredReports 0 }}
@@ -12,9 +13,9 @@
 
 <div class="container mx-auto px-4 py-10 max-w-5xl">
     <div class="mb-6 flex items-center gap-2 text-sm">
-        <a href="/user/{{ $userId }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">Projects</a>
+        <a href="{{ printf "/user/%s" $userId | relLangURL }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">{{ i18n "breadcrumb_projects" }}</a>
         <span class="text-muted">/</span>
-        <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
+        <a href="{{ printf "/user/%s/project/%s" $userId $projectId | relLangURL }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             {{ $project.name }}
         </a>
@@ -23,7 +24,7 @@
     <div class="surface-card p-8 mb-6">
         <div class="flex items-start justify-between mb-2">
             <div class="flex-1">
-                <div class="kicker mb-2">Report</div>
+                <div class="kicker mb-2">{{ i18n "kicker_report" }}</div>
                 <h1 class="text-4xl mb-2">{{ $report.name }}</h1>
                 <div class="accent-rule mb-4"></div>
                 <p class="text-lg text-muted">{{ $report.description }}</p>
@@ -35,11 +36,11 @@
 
         <div class="flex flex-wrap gap-3 mt-6">
             <button onclick="generateReport()" class="btn-accent">
-                Generate report
+                {{ i18n "btn_generate_report" }}
             </button>
             <a href="{{ $report.download_link }}" download class="btn-primary">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                Download
+                {{ i18n "btn_download" }}
             </a>
         </div>
     </div>
@@ -48,54 +49,54 @@
         <div class="lg:col-span-2 space-y-6">
             {{ if $report.preview }}
             <div class="surface-card p-6">
-                <div class="kicker mb-2">Preview</div>
-                <h2 class="text-2xl mb-4">Visual preview</h2>
+                <div class="kicker mb-2">{{ i18n "preview" }}</div>
+                <h2 class="text-2xl mb-4">{{ i18n "visual_preview" }}</h2>
                 <div class="rounded-xl overflow-hidden border border-[var(--color-surface-border)] dark:border-white/10">
                     <img src="{{ $report.preview }}" alt="{{ $report.name }} preview" class="w-full h-auto"
-                         onerror="this.parentElement.innerHTML='<div class=\'flex items-center justify-center h-64 surface-soft\'><span class=\'text-muted\'>Preview not available</span></div>'">
+                         onerror="this.parentElement.innerHTML='<div class=\'flex items-center justify-center h-64 surface-soft\'><span class=\'text-muted\'>{{ i18n "preview_unavailable" }}</span></div>'">
                 </div>
             </div>
             {{ end }}
 
             <div class="surface-card p-6">
-                <div class="kicker mb-2">Overview</div>
-                <h2 class="text-2xl mb-4">About this report</h2>
+                <div class="kicker mb-2">{{ i18n "overview" }}</div>
+                <h2 class="text-2xl mb-4">{{ i18n "about_this_report" }}</h2>
                 <p class="leading-relaxed">{{ $report.description }}</p>
             </div>
         </div>
 
         <div class="space-y-6">
             <div class="surface-card p-6">
-                <div class="kicker mb-2">Metadata</div>
-                <h2 class="text-xl mb-4">Details</h2>
+                <div class="kicker mb-2">{{ i18n "metadata" }}</div>
+                <h2 class="text-xl mb-4">{{ i18n "details" }}</h2>
                 <dl class="space-y-3">
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Generated</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_generated" }}</dt>
                         <dd class="mt-1">{{ $report.generated_date }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Last updated</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_last_updated" }}</dt>
                         <dd class="mt-1">{{ $report.last_updated }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">File size</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_file_size" }}</dt>
                         <dd class="mt-1">{{ $report.file_size }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Format</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_format" }}</dt>
                         <dd class="mt-1"><span class="pill pill-brand">{{ $report.format }}</span></dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Status</dt>
-                        <dd class="mt-1"><span class="pill pill-success">{{ $report.status }}</span></dd>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_status" }}</dt>
+                        <dd class="mt-1"><span class="pill pill-success">{{ i18n (printf "status_%s" $report.status) }}</span></dd>
                     </div>
                 </dl>
             </div>
 
             <div class="surface-card p-6">
-                <div class="kicker mb-2">Sources</div>
-                <h2 class="text-xl mb-2">Data sources</h2>
-                <p class="text-sm text-muted mb-3">Datasets used to generate this report:</p>
+                <div class="kicker mb-2">{{ i18n "sources" }}</div>
+                <h2 class="text-xl mb-2">{{ i18n "data_sources" }}</h2>
+                <p class="text-sm text-muted mb-3">{{ i18n "report_sources_hint" }}</p>
                 <div class="space-y-2">
                     {{ range $report.data_sources }}
                         {{ $datasetName := . }}
@@ -109,7 +110,7 @@
                         {{ else }}
                         <div class="surface-soft p-3">
                             <div class="font-medium">{{ $datasetName }}</div>
-                            <div class="text-sm text-muted">Dataset information not available</div>
+                            <div class="text-sm text-muted">{{ i18n "dataset_info_unavailable" }}</div>
                         </div>
                         {{ end }}
                     {{ end }}
@@ -132,7 +133,7 @@ const NotificationManager = {
         notification.innerHTML = `
             ${this.getIcon(type)}
             <span class="font-medium">${message}</span>
-            <button class="ml-auto opacity-80 hover:opacity-100" onclick="this.parentElement.remove()" aria-label="Close">
+            <button class="ml-auto opacity-80 hover:opacity-100" onclick="this.parentElement.remove()" aria-label="{{ i18n "close_aria" }}">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>`;
         container.appendChild(notification);
@@ -171,10 +172,10 @@ function generateReport() {
     const button = event.target;
     button.disabled = true;
     button.classList.add('opacity-75', 'cursor-not-allowed');
-    const loadingNotification = NotificationManager.show('Rendering report…', 'loading', 0);
+    const loadingNotification = NotificationManager.show({{ i18n "report_rendering" }}, 'loading', 0);
     setTimeout(() => {
         loadingNotification.remove();
-        NotificationManager.show('Report generated successfully!', 'success', 4000);
+        NotificationManager.show({{ i18n "report_generated" }}, 'success', 4000);
         button.disabled = false;
         button.classList.remove('opacity-75', 'cursor-not-allowed');
     }, 2000);

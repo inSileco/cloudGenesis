@@ -3,8 +3,9 @@
 {{ define "main" }}
 {{ $userId := .Params.userId }}
 {{ $projectId := .Params.projectId }}
-{{ $project := index .Site.Data.projects $projectId }}
-{{ $users := .Site.Data.users }}
+{{ $data := index .Site.Data .Site.Language.Lang }}
+{{ $project := index $data.projects $projectId }}
+{{ $users := $data.users }}
 {{ $owner := $project.owner }}
 {{ $admins := default (slice) $project.admins }}
 
@@ -15,20 +16,20 @@
     {{ range .recent_runs }}
         {{ $events = $events | append (dict
             "kind" "automation"
-            "title" (printf "Automation %s — %s" $automation.name .status)
+            "title" (i18n "event_automation" (dict "Name" $automation.name "Status" (i18n (printf "status_%s" .status))))
             "date" .date
             "status" .status
-            "url" (printf "/user/%s/project/%s/automations/%s/" $userId $projectId $automation.id)
+            "url" (printf "/user/%s/project/%s/automations/%s/" $userId $projectId $automation.id | relLangURL)
         ) }}
     {{ end }}
 {{ end }}
 {{ range $project.reports }}
     {{ $events = $events | append (dict
         "kind" "report"
-        "title" (printf "Report %q generated" .name)
+        "title" (i18n "event_report" (dict "Name" .name))
         "date" .generated_date
         "status" .status
-        "url" (printf "/user/%s/project/%s/reports/%s/" $userId $projectId .id)
+        "url" (printf "/user/%s/project/%s/reports/%s/" $userId $projectId .id | relLangURL)
     ) }}
 {{ end }}
 {{ $events = sort $events "date" "desc" }}
@@ -42,9 +43,9 @@
 
 <div class="container mx-auto px-4 py-10 max-w-6xl">
     <div class="mb-6 flex items-center gap-2 text-sm">
-        <a href="/user/{{ $userId }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">Projects</a>
+        <a href="{{ printf "/user/%s" $userId | relLangURL }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">{{ i18n "breadcrumb_projects" }}</a>
         <span class="text-muted">/</span>
-        <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
+        <a href="{{ printf "/user/%s/project/%s" $userId $projectId | relLangURL }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             {{ $project.name }}
         </a>
@@ -52,13 +53,13 @@
 
     <div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
-            <div class="kicker mb-2">Project settings</div>
+            <div class="kicker mb-2">{{ i18n "kicker_project_settings" }}</div>
             <h1 class="text-4xl md:text-5xl mb-2">{{ $project.name }}</h1>
             <div class="accent-rule mb-4"></div>
-            <p class="text-muted">Manage members, billing and project details.</p>
+            <p class="text-muted">{{ i18n "project_settings_subtitle" }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            <span class="pill pill-brand">{{ $project.plan }} plan</span>
+            <span class="pill pill-brand">{{ i18n "plan_badge" (dict "Plan" $project.plan) }}</span>
             <span class="pill" id="role-badge"></span>
         </div>
     </div>
@@ -68,34 +69,34 @@
         <section class="surface-card p-6 lg:col-span-2">
             <div class="flex items-start justify-between mb-4">
                 <div>
-                    <div class="kicker">Info</div>
-                    <h2 class="text-2xl mt-1">Project information</h2>
+                    <div class="kicker">{{ i18n "info" }}</div>
+                    <h2 class="text-2xl mt-1">{{ i18n "project_information" }}</h2>
                 </div>
-                <button class="btn-ghost text-sm" onclick="notify('Edit dialog would open here.', 'info');">Edit</button>
+                <button class="btn-ghost text-sm" onclick="notify({{ i18n "notif_edit_dialog" }}, 'info');">{{ i18n "btn_edit" }}</button>
             </div>
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                 <div>
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Name</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_name" }}</dt>
                     <dd class="mt-1 font-medium">{{ $project.name }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Location</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_location" }}</dt>
                     <dd class="mt-1">{{ default "—" $project.location }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Created</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_created" }}</dt>
                     <dd class="mt-1">{{ default "—" $project.created }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Owner</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_owner" }}</dt>
                     <dd class="mt-1 font-medium">{{ with index $users $owner }}{{ .fullName }}{{ end }}</dd>
                 </div>
                 <div class="sm:col-span-2">
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Short description</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_short_description" }}</dt>
                     <dd class="mt-1">{{ $project.short_description }}</dd>
                 </div>
                 <div class="sm:col-span-2">
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Description</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_description" }}</dt>
                     <dd class="mt-1 text-muted">{{ $project.description }}</dd>
                 </div>
             </dl>
@@ -105,37 +106,37 @@
         <section class="surface-card p-6">
             <div class="flex items-start justify-between mb-4">
                 <div>
-                    <div class="kicker">Billing</div>
-                    <h2 class="text-xl mt-1">Plan &amp; invoice</h2>
+                    <div class="kicker">{{ i18n "billing" }}</div>
+                    <h2 class="text-xl mt-1">{{ i18n "plan_and_invoice" }}</h2>
                 </div>
             </div>
             <dl class="space-y-3 text-sm">
                 <div class="flex items-center justify-between">
-                    <dt class="text-muted">Plan</dt>
+                    <dt class="text-muted">{{ i18n "label_plan" }}</dt>
                     <dd class="font-semibold">{{ $project.plan }}</dd>
                 </div>
                 <div class="flex items-center justify-between">
-                    <dt class="text-muted">Storage quota</dt>
+                    <dt class="text-muted">{{ i18n "label_storage_quota" }}</dt>
                     <dd class="font-semibold">{{ $storageQuota }} GB</dd>
                 </div>
                 <div class="flex items-center justify-between">
-                    <dt class="text-muted">Compute quota</dt>
-                    <dd class="font-semibold">{{ $computeQuota }} h / month</dd>
+                    <dt class="text-muted">{{ i18n "label_compute_quota" }}</dt>
+                    <dd class="font-semibold">{{ $computeQuota }} {{ i18n "h_per_month" }}</dd>
                 </div>
                 <div class="flex items-center justify-between">
-                    <dt class="text-muted">Seats</dt>
+                    <dt class="text-muted">{{ i18n "label_seats" }}</dt>
                     <dd class="font-semibold">{{ len $project.members }} / {{ with $project.quotas }}{{ .seats }}{{ end }}</dd>
                 </div>
                 <div class="flex items-center justify-between">
-                    <dt class="text-muted">Monthly</dt>
+                    <dt class="text-muted">{{ i18n "label_monthly" }}</dt>
                     <dd class="font-semibold">${{ $monthlyCost }}</dd>
                 </div>
                 <div class="flex items-center justify-between">
-                    <dt class="text-muted">Next invoice</dt>
+                    <dt class="text-muted">{{ i18n "label_next_invoice" }}</dt>
                     <dd class="font-semibold">{{ with $project.billing }}{{ .next_invoice }}{{ end }}</dd>
                 </div>
             </dl>
-            <button class="btn-primary w-full mt-5 requires-owner" onclick="notify('Billing portal would open here.', 'info');">Manage billing</button>
+            <button class="btn-primary w-full mt-5 requires-owner" onclick="notify({{ i18n "notif_billing_portal" }}, 'info');">{{ i18n "btn_manage_billing" }}</button>
         </section>
     </div>
 
@@ -143,15 +144,15 @@
     <section class="surface-card p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <div class="kicker">Usage</div>
-                <h2 class="text-2xl mt-1">Resource usage</h2>
+                <div class="kicker">{{ i18n "usage" }}</div>
+                <h2 class="text-2xl mt-1">{{ i18n "resource_usage" }}</h2>
             </div>
-            <span class="text-xs text-muted">This billing period</span>
+            <span class="text-xs text-muted">{{ i18n "this_billing_period" }}</span>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <div class="flex items-center justify-between mb-1 text-sm">
-                    <span class="text-muted">Storage</span>
+                    <span class="text-muted">{{ i18n "label_storage" }}</span>
                     <span class="font-semibold">{{ printf "%.1f GB / %.0f GB · %.0f%%" $storageUsed $storageQuota $storagePct }}</span>
                 </div>
                 <div class="progress {{ if gt $storagePct 85.0 }}danger{{ else if gt $storagePct 70.0 }}warn{{ end }}">
@@ -160,7 +161,7 @@
             </div>
             <div>
                 <div class="flex items-center justify-between mb-1 text-sm">
-                    <span class="text-muted">Compute</span>
+                    <span class="text-muted">{{ i18n "label_compute" }}</span>
                     <span class="font-semibold">{{ printf "%.1f h / %.0f h · %.0f%%" $computeUsed $computeQuota $computePct }}</span>
                 </div>
                 <div class="progress {{ if gt $computePct 85.0 }}danger{{ else if gt $computePct 70.0 }}warn{{ end }}">
@@ -174,19 +175,19 @@
     <section class="surface-card p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <div class="kicker">Team</div>
-                <h2 class="text-2xl mt-1">Members &amp; roles</h2>
+                <div class="kicker">{{ i18n "team" }}</div>
+                <h2 class="text-2xl mt-1">{{ i18n "members_and_roles" }}</h2>
             </div>
-            <button class="btn-primary" onclick="notify('Invite dialog would open here.', 'info');">+ Invite member</button>
+            <button class="btn-primary" onclick="notify({{ i18n "notif_invite_dialog" }}, 'info');">{{ i18n "btn_invite_member" }}</button>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-[var(--color-surface-border)] dark:border-white/10">
-                        <th class="py-2 pr-4">Member</th>
-                        <th class="py-2 pr-4">Role</th>
-                        <th class="py-2 pr-4">Email</th>
-                        <th class="py-2">Actions</th>
+                        <th class="py-2 pr-4">{{ i18n "th_member" }}</th>
+                        <th class="py-2 pr-4">{{ i18n "label_role" }}</th>
+                        <th class="py-2 pr-4">{{ i18n "th_email" }}</th>
+                        <th class="py-2">{{ i18n "th_actions" }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -207,7 +208,7 @@
                             </div>
                         </td>
                         <td class="py-3 pr-4">
-                            <span class="pill {{ if eq $role "owner" }}pill-success{{ else if eq $role "admin" }}pill-brand{{ else }}pill-warning{{ end }}">{{ $role }}</span>
+                            <span class="pill {{ if eq $role "owner" }}pill-success{{ else if eq $role "admin" }}pill-brand{{ else }}pill-warning{{ end }}">{{ i18n (printf "role_%s" $role) }}</span>
                         </td>
                         <td class="py-3 pr-4 text-muted">{{ $member.email }}</td>
                         <td class="py-3">
@@ -215,8 +216,8 @@
                                 {{ if eq $role "owner" }}
                                 <span class="text-xs text-muted">—</span>
                                 {{ else }}
-                                <button class="text-sm text-brand-500 hover:underline dark:text-accent" onclick="notify('Role editor would open here.', 'info');">Change role</button>
-                                <button class="text-sm text-muted hover:text-red-600" onclick="notify('Member would be removed.', 'warning');">Remove</button>
+                                <button class="text-sm text-brand-500 hover:underline dark:text-accent" onclick="notify({{ i18n "notif_role_editor" }}, 'info');">{{ i18n "btn_change_role" }}</button>
+                                <button class="text-sm text-muted hover:text-red-600" onclick="notify({{ i18n "notif_member_removed" }}, 'warning');">{{ i18n "btn_remove" }}</button>
                                 {{ end }}
                             </div>
                         </td>
@@ -231,10 +232,10 @@
     <section class="surface-card p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <div class="kicker">Activity</div>
-                <h2 class="text-2xl mt-1">Recent activity</h2>
+                <div class="kicker">{{ i18n "activity" }}</div>
+                <h2 class="text-2xl mt-1">{{ i18n "recent_activity" }}</h2>
             </div>
-            <span class="text-xs text-muted">{{ len $events }} events</span>
+            <span class="text-xs text-muted">{{ i18n "events_count" (len $events) }}</span>
         </div>
         {{ if $events }}
         <ol class="relative border-l-2 border-[var(--color-surface-border)] dark:border-white/10 ml-3 space-y-4 pl-6">
@@ -261,36 +262,36 @@
                             {{ else if eq .status "warning" }}pill-warning
                             {{ else if eq .status "published" }}pill-success
                             {{ else if eq .status "draft" }}pill-warning
-                            {{ else }}pill-brand{{ end }}">{{ .status }}</span>
+                            {{ else }}pill-brand{{ end }}">{{ i18n (printf "status_%s" .status) }}</span>
                     </div>
                 </a>
             </li>
             {{ end }}
         </ol>
         {{ else }}
-        <p class="text-muted text-sm">No recorded activity yet.</p>
+        <p class="text-muted text-sm">{{ i18n "no_activity" }}</p>
         {{ end }}
     </section>
 
     <!-- Danger zone -->
     <section class="surface-card p-6 border-red-200 dark:border-red-900/40 requires-owner">
-        <div class="kicker mb-2" style="color:#dc2626">Danger zone</div>
-        <h2 class="text-2xl mb-4">Danger zone</h2>
-        <p class="text-sm text-muted mb-4">These actions are restricted to the project owner.</p>
+        <div class="kicker mb-2" style="color:#dc2626">{{ i18n "danger_zone" }}</div>
+        <h2 class="text-2xl mb-4">{{ i18n "danger_zone" }}</h2>
+        <p class="text-sm text-muted mb-4">{{ i18n "danger_owner_only" }}</p>
         <div class="space-y-3">
             <div class="flex items-center justify-between gap-4 surface-soft p-4">
                 <div>
-                    <div class="font-semibold">Transfer ownership</div>
-                    <div class="text-sm text-muted">Hand over the project to another admin. You will keep admin access unless removed.</div>
+                    <div class="font-semibold">{{ i18n "transfer_ownership" }}</div>
+                    <div class="text-sm text-muted">{{ i18n "transfer_desc" }}</div>
                 </div>
-                <button class="btn-ghost" onclick="notify('Transfer flow would start here.', 'info');">Transfer</button>
+                <button class="btn-ghost" onclick="notify({{ i18n "notif_transfer_flow" }}, 'info');">{{ i18n "btn_transfer" }}</button>
             </div>
             <div class="flex items-center justify-between gap-4 p-4 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50/60 dark:bg-red-900/10">
                 <div>
-                    <div class="font-semibold text-red-700 dark:text-red-300">Archive project</div>
-                    <div class="text-sm text-muted">Hide the project and stop all automations. This is reversible by a sysadmin.</div>
+                    <div class="font-semibold text-red-700 dark:text-red-300">{{ i18n "archive_project" }}</div>
+                    <div class="text-sm text-muted">{{ i18n "archive_desc" }}</div>
                 </div>
-                <button class="btn-ghost" style="border-color:#dc2626;color:#dc2626" onclick="notify('Project would be archived.', 'error');">Archive</button>
+                <button class="btn-ghost" style="border-color:#dc2626;color:#dc2626" onclick="notify({{ i18n "notif_project_archived" }}, 'error');">{{ i18n "btn_archive" }}</button>
             </div>
         </div>
     </section>
@@ -328,14 +329,14 @@ function notify(message, type = 'info', duration = 2500) {
 const userEmail = localStorage.getItem('userEmail');
 const userId = localStorage.getItem('userId');
 if (!userEmail) {
-    window.location.href = '/';
+    window.location.href = LANG_PREFIX;
 } else if (userId !== OWNER_ID && !ADMIN_IDS.includes(userId)) {
-    window.location.href = userId ? `/user/${userId}/` : '/';
+    window.location.href = userId ? `${LANG_PREFIX}user/${userId}/` : LANG_PREFIX;
 } else {
     const isOwner = userId === OWNER_ID;
     const badge = document.getElementById('role-badge');
     if (badge) {
-        badge.textContent = isOwner ? 'owner' : 'admin';
+        badge.textContent = isOwner ? {{ i18n "role_owner" }} : {{ i18n "role_admin" }};
         badge.classList.add(isOwner ? 'pill-success' : 'pill-brand');
     }
     if (!isOwner) {

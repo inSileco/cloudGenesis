@@ -3,29 +3,30 @@
 {{ define "main" }}
 {{ $userId := .Params.userId }}
 {{ $projectId := .Params.projectId }}
-{{ $project := index .Site.Data.projects $projectId }}
+{{ $data := index .Site.Data .Site.Language.Lang }}
+{{ $project := index $data.projects $projectId }}
 
 <div class="container mx-auto px-4 py-10 max-w-6xl">
     <div class="mb-6 flex items-center gap-2 text-sm">
-        <a href="/user/{{ $userId }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">Projects</a>
+        <a href="{{ printf "/user/%s" $userId | relLangURL }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">{{ i18n "breadcrumb_projects" }}</a>
         <span class="text-muted">/</span>
-        <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
+        <a href="{{ printf "/user/%s/project/%s" $userId $projectId | relLangURL }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             {{ $project.name }}
         </a>
     </div>
 
     <div class="mb-8">
-        <div class="kicker mb-2">Applications</div>
-        <h1 class="text-4xl md:text-5xl mb-2">All applications</h1>
+        <div class="kicker mb-2">{{ i18n "kicker_applications" }}</div>
+        <h1 class="text-4xl md:text-5xl mb-2">{{ i18n "all_applications" }}</h1>
         <div class="accent-rule mb-4"></div>
-        <p class="text-muted">{{ $project.name }} — {{ len $project.apps }} application{{ if ne (len $project.apps) 1 }}s{{ end }}.</p>
+        <p class="text-muted">{{ $project.name }} — {{ i18n "applications_count" (len $project.apps) }}.</p>
     </div>
 
     <section class="surface-card p-6 mb-8">
-        <div class="kicker mb-2">What are applications?</div>
-        <h2 class="text-2xl mb-3">Interactive tools built on your project data</h2>
-        <p class="leading-relaxed text-muted">Applications are browser-based, interactive tools built on top of your project — dashboards, map explorers, data-entry forms and custom visualisations designed for non-technical users. They let stakeholders explore data, make decisions and contribute observations without touching code, and they stay in sync with the underlying datasets through the project's automations.</p>
+        <div class="kicker mb-2">{{ i18n "what_are_applications" }}</div>
+        <h2 class="text-2xl mb-3">{{ i18n "applications_explain_title" }}</h2>
+        <p class="leading-relaxed text-muted">{{ i18n "applications_explain_body" }}</p>
     </section>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -35,7 +36,7 @@
             <{{ $tag }} {{ if $hasUrl }}href="{{ .url }}" target="_blank" rel="noopener"{{ end }} class="surface-card p-6 {{ if $hasUrl }}hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block{{ end }}">
                 <div class="flex items-start justify-between mb-3 gap-3">
                     <div class="min-w-0">
-                        <div class="kicker">Application</div>
+                        <div class="kicker">{{ i18n "kicker_application" }}</div>
                         <h3 class="text-lg mt-1 {{ if $hasUrl }}group-hover:text-brand-500 dark:group-hover:text-accent transition-colors{{ end }}">{{ .name }}</h3>
                     </div>
                     <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent flex-shrink-0">
@@ -46,12 +47,12 @@
                 <div class="flex items-center justify-between text-xs pt-3 border-t border-[var(--color-surface-border)] dark:border-white/10">
                     {{ if $hasUrl }}
                     <span class="text-brand-500 dark:text-accent inline-flex items-center gap-1.5">
-                        Open
+                        {{ i18n "open_app" }}
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4m-7-9l7-1m0 0l1 7m-1-7L10 14"/></svg>
                     </span>
                     <span class="text-muted truncate ml-3">{{ .url }}</span>
                     {{ else }}
-                    <span class="pill pill-warning">coming soon</span>
+                    <span class="pill pill-warning">{{ i18n "coming_soon" }}</span>
                     <span></span>
                     {{ end }}
                 </div>
@@ -62,6 +63,6 @@
 
 <script>
 const userEmail = localStorage.getItem('userEmail');
-if (!userEmail) window.location.href = '/';
+if (!userEmail) window.location.href = LANG_PREFIX;
 </script>
 {{ end }}

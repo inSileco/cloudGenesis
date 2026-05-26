@@ -4,16 +4,17 @@
 {{ $userId := .Params.userId }}
 {{ $projectId := .Params.projectId }}
 {{ $automationId := .Params.automationId }}
-{{ $project := index .Site.Data.projects $projectId }}
+{{ $data := index .Site.Data .Site.Language.Lang }}
+{{ $project := index $data.projects $projectId }}
 {{ $filteredAutomations := where $project.automations "id" $automationId }}
 {{ $automation := index $filteredAutomations 0 }}
 {{ $status := $automation.last_execution.status }}
 
 <div class="container mx-auto px-4 py-10 max-w-5xl">
     <div class="mb-6 flex items-center gap-2 text-sm">
-        <a href="/user/{{ $userId }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">Projects</a>
+        <a href="{{ printf "/user/%s" $userId | relLangURL }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">{{ i18n "breadcrumb_projects" }}</a>
         <span class="text-muted">/</span>
-        <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
+        <a href="{{ printf "/user/%s/project/%s" $userId $projectId | relLangURL }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             {{ $project.name }}
         </a>
@@ -22,7 +23,7 @@
     <div class="surface-card p-8 mb-6">
         <div class="flex items-start justify-between gap-4">
             <div class="flex-1">
-                <div class="kicker mb-2">Automation</div>
+                <div class="kicker mb-2">{{ i18n "kicker_automation" }}</div>
                 <h1 class="text-4xl mb-2">{{ $automation.name }}</h1>
                 <div class="accent-rule mb-4"></div>
                 <p class="text-lg text-muted">{{ $automation.description }}</p>
@@ -33,7 +34,7 @@
                         {{ if eq $status "success" }}pill-success
                         {{ else if eq $status "failed" }}pill-error
                         {{ else if eq $status "warning" }}pill-warning
-                        {{ else }}pill-brand{{ end }}">last run: {{ $status }}</span>
+                        {{ else }}pill-brand{{ end }}">{{ i18n "label_last_run" }}: {{ i18n (printf "status_%s" $status) }}</span>
                 </div>
             </div>
             <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent flex-shrink-0">
@@ -44,11 +45,11 @@
         <div class="flex flex-wrap gap-3 mt-6">
             <button id="play-automation" onclick="playAutomation()" class="btn-accent">
                 <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                Play automation
+                {{ i18n "btn_play" }}
             </button>
             <button class="btn-primary">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Schedule
+                {{ i18n "btn_schedule" }}
             </button>
         </div>
     </div>
@@ -56,8 +57,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
             <div class="surface-card p-6">
-                <div class="kicker mb-2">Workflow</div>
-                <h2 class="text-2xl mb-4">Steps</h2>
+                <div class="kicker mb-2">{{ i18n "workflow" }}</div>
+                <h2 class="text-2xl mb-4">{{ i18n "steps" }}</h2>
                 <ol class="relative border-l-2 border-[var(--color-surface-border)] dark:border-white/10 ml-3 space-y-5 pl-6">
                     {{ range $idx, $step := $automation.steps }}
                     <li class="relative">
@@ -65,7 +66,7 @@
                         <div class="surface-soft p-4">
                             <div class="flex items-center justify-between gap-3 mb-1">
                                 <h3 class="font-semibold text-base">{{ $step.name }}</h3>
-                                <span class="text-xs text-muted whitespace-nowrap">avg {{ $step.avg_duration }}</span>
+                                <span class="text-xs text-muted whitespace-nowrap">{{ i18n "avg" }} {{ $step.avg_duration }}</span>
                             </div>
                             <p class="text-sm text-muted">{{ $step.description }}</p>
                         </div>
@@ -76,15 +77,15 @@
 
             {{ if $automation.recent_runs }}
             <div class="surface-card p-6">
-                <div class="kicker mb-2">History</div>
-                <h2 class="text-2xl mb-4">Recent runs</h2>
+                <div class="kicker mb-2">{{ i18n "history" }}</div>
+                <h2 class="text-2xl mb-4">{{ i18n "recent_runs_title" }}</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-[var(--color-surface-border)] dark:border-white/10">
-                                <th class="py-2 pr-4">Date</th>
-                                <th class="py-2 pr-4">Status</th>
-                                <th class="py-2">Duration</th>
+                                <th class="py-2 pr-4">{{ i18n "th_date" }}</th>
+                                <th class="py-2 pr-4">{{ i18n "th_status" }}</th>
+                                <th class="py-2">{{ i18n "th_duration" }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -96,7 +97,7 @@
                                         {{ if eq .status "success" }}pill-success
                                         {{ else if eq .status "failed" }}pill-error
                                         {{ else if eq .status "warning" }}pill-warning
-                                        {{ else }}pill-brand{{ end }}">{{ .status }}</span>
+                                        {{ else }}pill-brand{{ end }}">{{ i18n (printf "status_%s" .status) }}</span>
                                 </td>
                                 <td class="py-2">{{ .duration }}</td>
                             </tr>
@@ -110,30 +111,30 @@
 
         <div class="space-y-6">
             <div class="surface-card p-6">
-                <div class="kicker mb-2">Last execution</div>
-                <h2 class="text-xl mb-4">Latest run</h2>
+                <div class="kicker mb-2">{{ i18n "last_execution" }}</div>
+                <h2 class="text-xl mb-4">{{ i18n "latest_run" }}</h2>
                 <dl class="space-y-3">
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Date</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_date" }}</dt>
                         <dd class="mt-1">{{ $automation.last_execution.date }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Status</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_status" }}</dt>
                         <dd class="mt-1">
                             <span class="pill
                                 {{ if eq $status "success" }}pill-success
                                 {{ else if eq $status "failed" }}pill-error
                                 {{ else if eq $status "warning" }}pill-warning
-                                {{ else }}pill-brand{{ end }}">{{ $status }}</span>
+                                {{ else }}pill-brand{{ end }}">{{ i18n (printf "status_%s" $status) }}</span>
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Duration</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_duration" }}</dt>
                         <dd class="mt-1">{{ $automation.last_execution.duration }}</dd>
                     </div>
                     {{ with $automation.last_execution.records_processed }}
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Records processed</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_records_processed" }}</dt>
                         <dd class="mt-1">{{ . }}</dd>
                     </div>
                     {{ end }}
@@ -141,23 +142,23 @@
             </div>
 
             <div class="surface-card p-6">
-                <div class="kicker mb-2">Stats</div>
-                <h2 class="text-xl mb-4">Overall</h2>
+                <div class="kicker mb-2">{{ i18n "stats" }}</div>
+                <h2 class="text-xl mb-4">{{ i18n "overall" }}</h2>
                 <dl class="space-y-3">
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Schedule</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_schedule" }}</dt>
                         <dd class="mt-1">{{ $automation.schedule }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Total runs</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_total_runs" }}</dt>
                         <dd class="mt-1">{{ $automation.runs_count }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Average duration</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_avg_duration" }}</dt>
                         <dd class="mt-1">{{ $automation.avg_duration }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">Steps</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-muted">{{ i18n "label_steps" }}</dt>
                         <dd class="mt-1">{{ len $automation.steps }}</dd>
                     </div>
                 </dl>
@@ -179,7 +180,7 @@ const NotificationManager = {
         notification.innerHTML = `
             ${this.getIcon(type)}
             <span class="font-medium">${message}</span>
-            <button class="ml-auto opacity-80 hover:opacity-100" onclick="this.parentElement.remove()" aria-label="Close">
+            <button class="ml-auto opacity-80 hover:opacity-100" onclick="this.parentElement.remove()" aria-label="{{ i18n "close_aria" }}">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>`;
         container.appendChild(notification);
@@ -218,16 +219,16 @@ function playAutomation() {
     const button = document.getElementById('play-automation');
     button.disabled = true;
     button.classList.add('opacity-75', 'cursor-not-allowed');
-    const loading = NotificationManager.show('Automation queued — running…', 'loading', 0);
+    const loading = NotificationManager.show({{ i18n "auto_queued" }}, 'loading', 0);
     setTimeout(() => {
         loading.remove();
-        NotificationManager.show('Automation finished successfully.', 'success', 4000);
+        NotificationManager.show({{ i18n "auto_finished" }}, 'success', 4000);
         button.disabled = false;
         button.classList.remove('opacity-75', 'cursor-not-allowed');
     }, 2200);
 }
 
 const userEmail = localStorage.getItem('userEmail');
-if (!userEmail) window.location.href = '/';
+if (!userEmail) window.location.href = LANG_PREFIX;
 </script>
 {{ end }}

@@ -3,37 +3,38 @@
 {{ define "main" }}
 {{ $userId := .Params.userId }}
 {{ $projectId := .Params.projectId }}
-{{ $project := index .Site.Data.projects $projectId }}
+{{ $data := index .Site.Data .Site.Language.Lang }}
+{{ $project := index $data.projects $projectId }}
 
 <div class="container mx-auto px-4 py-10 max-w-6xl">
     <div class="mb-6 flex items-center gap-2 text-sm">
-        <a href="/user/{{ $userId }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">Projects</a>
+        <a href="{{ printf "/user/%s" $userId | relLangURL }}" class="text-muted hover:text-brand-500 dark:hover:text-accent transition-colors">{{ i18n "breadcrumb_projects" }}</a>
         <span class="text-muted">/</span>
-        <a href="/user/{{ $userId }}/project/{{ $projectId }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
+        <a href="{{ printf "/user/%s/project/%s" $userId $projectId | relLangURL }}" class="text-brand-500 hover:text-brand-600 dark:text-accent dark:hover:opacity-80 transition-colors inline-flex items-center gap-1.5">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             {{ $project.name }}
         </a>
     </div>
 
     <div class="mb-8">
-        <div class="kicker mb-2">Datasets</div>
-        <h1 class="text-4xl md:text-5xl mb-2">All datasets</h1>
+        <div class="kicker mb-2">{{ i18n "kicker_datasets" }}</div>
+        <h1 class="text-4xl md:text-5xl mb-2">{{ i18n "all_datasets" }}</h1>
         <div class="accent-rule mb-4"></div>
-        <p class="text-muted">{{ $project.name }} — {{ len $project.datasets }} dataset{{ if ne (len $project.datasets) 1 }}s{{ end }}.</p>
+        <p class="text-muted">{{ $project.name }} — {{ i18n "datasets_count" (len $project.datasets) }}.</p>
     </div>
 
     <section class="surface-card p-6 mb-8">
-        <div class="kicker mb-2">What are datasets?</div>
-        <h2 class="text-2xl mb-3">Your project's raw and processed data</h2>
-        <p class="leading-relaxed text-muted">Datasets are the raw observations, sensor readings, model outputs, and derived layers your team relies on. Each dataset has a schema, a download path, and metadata describing its source and update history. Datasets are consumed by automations and referenced by reports — they are the single source of truth that everything else in the project is built from.</p>
+        <div class="kicker mb-2">{{ i18n "what_are_datasets" }}</div>
+        <h2 class="text-2xl mb-3">{{ i18n "datasets_explain_title" }}</h2>
+        <p class="leading-relaxed text-muted">{{ i18n "datasets_explain_body" }}</p>
     </section>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {{ range $project.datasets }}
-        <a href="/user/{{ $userId }}/project/{{ $projectId }}/datasets/{{ .id }}" class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
+        <a href="{{ printf "/user/%s/project/%s/datasets/%s" $userId $projectId .id | relLangURL }}" class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
             <div class="flex items-start justify-between mb-3 gap-3">
                 <div class="min-w-0">
-                    <div class="kicker">Dataset</div>
+                    <div class="kicker">{{ i18n "kicker_dataset" }}</div>
                     <h3 class="text-lg mt-1 group-hover:text-brand-500 dark:group-hover:text-accent transition-colors truncate">{{ .name }}</h3>
                 </div>
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent flex-shrink-0">
@@ -45,12 +46,12 @@
                 <span class="pill pill-brand">{{ .format }}</span>
                 <span class="pill pill-brand">{{ .volume }}</span>
                 {{ with .status }}
-                <span class="pill {{ if eq . "active" }}pill-success{{ else if eq . "archived" }}pill-warning{{ else }}pill-brand{{ end }}">{{ . }}</span>
+                <span class="pill {{ if eq . "active" }}pill-success{{ else if eq . "archived" }}pill-warning{{ else }}pill-brand{{ end }}">{{ i18n (printf "status_%s" .) }}</span>
                 {{ end }}
             </div>
             <div class="flex items-center justify-between text-xs text-muted pt-3 border-t border-[var(--color-surface-border)] dark:border-white/10">
-                {{ with .record_count }}<span>{{ . }} records</span>{{ else }}<span></span>{{ end }}
-                {{ with .last_updated }}<span>Updated {{ . }}</span>{{ end }}
+                {{ with .record_count }}<span>{{ i18n "records_count" (int .) }}</span>{{ else }}<span></span>{{ end }}
+                {{ with .last_updated }}<span>{{ i18n "meta_updated" }} {{ . }}</span>{{ end }}
             </div>
         </a>
         {{ end }}
@@ -59,6 +60,6 @@
 
 <script>
 const userEmail = localStorage.getItem('userEmail');
-if (!userEmail) window.location.href = '/';
+if (!userEmail) window.location.href = LANG_PREFIX;
 </script>
 {{ end }}
