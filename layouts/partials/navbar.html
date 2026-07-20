@@ -95,8 +95,8 @@
         <div class="surface-card p-6">
             <div class="flex justify-between items-center mb-2">
                 <div>
-                    <div class="kicker">{{ i18n "login_kicker" }}</div>
-                    <h3 class="text-2xl mt-1">{{ i18n "login_title" }}</h3>
+                    <div class="kicker" id="auth-modal-kicker">{{ i18n "login_kicker" }}</div>
+                    <h3 class="text-2xl mt-1" id="auth-modal-title">{{ i18n "login_title" }}</h3>
                 </div>
                 <button id="close-modal" class="text-muted hover:text-brand-500 dark:hover:text-accent" aria-label="{{ i18n "close_aria" }}">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -106,17 +106,47 @@
             </div>
             <div class="accent-rule my-3"></div>
 
-            <form id="login-form" class="space-y-4 mt-4">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_email" }}</label>
-                    <input type="email" id="email" name="email" required class="input-field">
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_password" }}</label>
-                    <input type="password" id="password" name="password" required class="input-field">
-                </div>
-                <button type="submit" class="btn-primary w-full">{{ i18n "btn_sign_in" }}</button>
-            </form>
+            <!-- Sign-in view -->
+            <div id="login-view">
+                <form id="login-form" class="space-y-4 mt-4">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_email" }}</label>
+                        <input type="email" id="email" name="email" required class="input-field">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_password" }}</label>
+                        <input type="password" id="password" name="password" required class="input-field">
+                    </div>
+                    <button type="submit" class="btn-primary w-full">{{ i18n "btn_sign_in" }}</button>
+                </form>
+                <p class="text-sm text-muted mt-4 text-center">
+                    {{ i18n "register_prompt" }}
+                    <button type="button" id="show-register" class="font-semibold text-brand-500 dark:text-accent hover:underline">{{ i18n "register_cta" }}</button>
+                </p>
+            </div>
+
+            <!-- Register view -->
+            <div id="register-view" class="hidden">
+                <form id="register-form" class="space-y-4 mt-4">
+                    <div>
+                        <label for="register-name" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_full_name" }}</label>
+                        <input type="text" id="register-name" name="fullName" required autocomplete="name" class="input-field">
+                    </div>
+                    <div>
+                        <label for="register-email" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_email" }}</label>
+                        <input type="email" id="register-email" name="email" required autocomplete="email" class="input-field">
+                    </div>
+                    <div>
+                        <label for="register-password" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_password" }}</label>
+                        <input type="password" id="register-password" name="password" required minlength="6" autocomplete="new-password" class="input-field">
+                    </div>
+                    <button type="submit" class="btn-primary w-full">{{ i18n "btn_register" }}</button>
+                </form>
+                <p class="text-sm text-muted mt-4 text-center">
+                    {{ i18n "login_prompt" }}
+                    <button type="button" id="show-login" class="font-semibold text-brand-500 dark:text-accent hover:underline">{{ i18n "login_cta" }}</button>
+                </p>
+            </div>
 
             <div id="login-message" class="hidden mt-4 p-3 rounded-md text-sm"></div>
         </div>
@@ -249,21 +279,52 @@
     const loginButtonMobile = document.getElementById('login-button-mobile');
     const closeModal = document.getElementById('close-modal');
     const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
     const loginMessage = document.getElementById('login-message');
+    const loginView = document.getElementById('login-view');
+    const registerView = document.getElementById('register-view');
+    const authKicker = document.getElementById('auth-modal-kicker');
+    const authTitle = document.getElementById('auth-modal-title');
+
+    function showLoginView() {
+        registerView?.classList.add('hidden');
+        loginView?.classList.remove('hidden');
+        loginMessage.classList.add('hidden');
+        if (authKicker) authKicker.textContent = {{ i18n "login_kicker" }};
+        if (authTitle) authTitle.textContent = {{ i18n "login_title" }};
+    }
+    function showRegisterView() {
+        loginView?.classList.add('hidden');
+        registerView?.classList.remove('hidden');
+        loginMessage.classList.add('hidden');
+        if (authKicker) authKicker.textContent = {{ i18n "register_kicker" }};
+        if (authTitle) authTitle.textContent = {{ i18n "register_title" }};
+    }
 
     function openModal() { modal.classList.remove('hidden'); }
     function closeModalFunc() {
         modal.classList.add('hidden');
-        loginForm.reset();
+        loginForm?.reset();
+        registerForm?.reset();
         loginMessage.classList.add('hidden');
+        showLoginView();
     }
 
     loginButton?.addEventListener('click', openModal);
     loginButtonMobile?.addEventListener('click', openModal);
     closeModal?.addEventListener('click', closeModalFunc);
+    document.getElementById('show-register')?.addEventListener('click', showRegisterView);
+    document.getElementById('show-login')?.addEventListener('click', showLoginView);
     modal?.addEventListener('click', function (e) {
         if (e.target === modal) closeModalFunc();
     });
+
+    function showAuthError(message) {
+        loginMessage.textContent = message;
+        loginMessage.className = 'mt-4 p-3 rounded-md text-sm bg-red-50 text-red-700 border border-red-100 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900';
+        loginMessage.classList.remove('hidden');
+        setTimeout(() => loginMessage.classList.add('hidden'), 3000);
+    }
 
     {{- $usersByEmail := dict -}}
     {{- range $userId, $u := (index .Site.Data .Site.Language.Lang).users -}}
@@ -287,10 +348,44 @@
             localStorage.setItem('isSysAdmin', user.isSysAdmin ? 'true' : 'false');
             window.location.href = `${LANG_PREFIX}user/${user.userId}`;
         } else {
-            loginMessage.textContent = {{ i18n "login_invalid" }};
-            loginMessage.className = 'mt-4 p-3 rounded-md text-sm bg-red-50 text-red-700 border border-red-100 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900';
-            loginMessage.classList.remove('hidden');
-            setTimeout(() => loginMessage.classList.add('hidden'), 3000);
+            showAuthError({{ i18n "login_invalid" }});
         }
+    });
+
+    // Registration — client-side only (no backend in this prototype). Creates a
+    // local account, signs the new user in, then launches the onboarding tour.
+    function makeUserId(email) {
+        const base = (email.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        return base || 'user';
+    }
+
+    registerForm?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const fullName = document.getElementById('register-name').value.trim();
+        const email = document.getElementById('register-email').value.trim();
+        const password = document.getElementById('register-password').value;
+
+        if (!fullName || !email || password.length < 6) {
+            showAuthError({{ i18n "register_invalid" }});
+            return;
+        }
+        // Don't shadow an existing seeded demo account.
+        if (USERS_BY_EMAIL[email]) {
+            showAuthError({{ i18n "register_email_taken" }});
+            return;
+        }
+
+        const userId = makeUserId(email);
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userName', fullName.split(/\s+/)[0]);
+        localStorage.setItem('userFullName', fullName);
+        localStorage.setItem('userId', userId);
+        localStorage.setItem('isSysAdmin', 'false');
+        // Fresh account: make sure the onboarding tour has not been marked as seen.
+        try { localStorage.removeItem('onboardingDone_' + userId); } catch (err) {}
+
+        closeModalFunc();
+        updateNavbar();
+        if (window.startOnboarding) window.startOnboarding();
     });
 </script>

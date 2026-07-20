@@ -186,6 +186,16 @@
                         {{ end }}
                     </ul>
                 </div>
+
+                <div class="mt-6 pt-6 border-t border-[var(--color-surface-border)] dark:border-white/10">
+                    <div class="flex items-center justify-between gap-4 surface-soft p-4">
+                        <div>
+                            <h3 class="font-semibold">{{ i18n "onb_replay" }}</h3>
+                            <p class="text-sm text-muted mt-1">{{ i18n "onb_replay_desc" }}</p>
+                        </div>
+                        <button type="button" class="btn-ghost text-sm whitespace-nowrap" onclick="window.startOnboarding && window.startOnboarding()">{{ i18n "btn_replay_tour" }}</button>
+                    </div>
+                </div>
             </section>
 
             <!-- Sessions -->
