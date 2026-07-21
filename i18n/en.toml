@@ -151,6 +151,11 @@ what_are_datasets = "What are datasets?"
 datasets_explain_title = "Your project's raw and processed data"
 datasets_explain_body = "Datasets are the raw observations, sensor readings, model outputs, and derived layers your team relies on. Each dataset has a schema, a download path, and metadata describing its source and update history. Datasets are consumed by automations and referenced by reports — they are the single source of truth that everything else in the project is built from."
 kicker_dataset = "Dataset"
+btn_upload_dataset = "Upload dataset"
+upload_dataset_kicker = "New"
+upload_dataset_title = "Upload a dataset"
+btn_upload = "Upload"
+dataset_name_required = "Please enter a dataset name."
 
 # Dataset detail
 btn_download = "Download"

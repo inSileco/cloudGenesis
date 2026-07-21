@@ -151,6 +151,11 @@ what_are_datasets = "Qu'est-ce qu'un jeu de données?"
 datasets_explain_title = "Les données brutes et traitées de votre projet"
 datasets_explain_body = "Les jeux de données regroupent les observations brutes, les relevés de capteurs, les sorties de modèles et les couches dérivées sur lesquelles votre équipe s'appuie. Chaque jeu de données possède un schéma, un chemin de téléchargement et des métadonnées décrivant sa source et son historique de mise à jour. Les jeux de données sont utilisés par les automatisations et référencés par les rapports — ils constituent la source unique de vérité sur laquelle repose tout le reste du projet."
 kicker_dataset = "Jeu de données"
+btn_upload_dataset = "Téléverser un jeu de données"
+upload_dataset_kicker = "Nouveau"
+upload_dataset_title = "Téléverser un jeu de données"
+btn_upload = "Téléverser"
+dataset_name_required = "Veuillez saisir un nom de jeu de données."
 
 # Détail du jeu de données
 btn_download = "Télécharger"

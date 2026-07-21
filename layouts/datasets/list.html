@@ -16,11 +16,17 @@
         </a>
     </div>
 
-    <div class="mb-8">
-        <div class="kicker mb-2">{{ i18n "kicker_datasets" }}</div>
-        <h1 class="text-4xl md:text-5xl mb-2">{{ i18n "all_datasets" }}</h1>
-        <div class="accent-rule mb-4"></div>
-        <p class="text-muted">{{ $project.name }} — {{ i18n "datasets_count" (len $project.datasets) }}.</p>
+    <div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+            <div class="kicker mb-2">{{ i18n "kicker_datasets" }}</div>
+            <h1 class="text-4xl md:text-5xl mb-2">{{ i18n "all_datasets" }}</h1>
+            <div class="accent-rule mb-4"></div>
+            <p class="text-muted">{{ $project.name }} — <span id="dataset-count">{{ i18n "datasets_count" (len $project.datasets) }}</span>.</p>
+        </div>
+        <button id="upload-dataset-button" type="button" class="btn-primary text-sm whitespace-nowrap self-start md:self-auto">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></svg>
+            {{ i18n "btn_upload_dataset" }}
+        </button>
     </div>
 
     <section class="surface-card p-6 mb-8">
@@ -29,7 +35,7 @@
         <p class="leading-relaxed text-muted">{{ i18n "datasets_explain_body" }}</p>
     </section>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="dataset-grid">
         {{ range $project.datasets }}
         <a href="{{ printf "/user/%s/project/%s/datasets/%s" $userId $projectId .id | relLangURL }}" class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
             <div class="flex items-start justify-between mb-3 gap-3">
@@ -58,8 +64,183 @@
     </div>
 </div>
 
+<!-- Upload dataset modal -->
+<div id="upload-dataset-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-[#0f172a]/60 backdrop-blur-sm">
+    <div class="relative top-20 mx-auto w-full max-w-lg px-4">
+        <div class="surface-card p-6">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <div class="kicker">{{ i18n "upload_dataset_kicker" }}</div>
+                    <h3 class="text-2xl mt-1">{{ i18n "upload_dataset_title" }}</h3>
+                </div>
+                <button id="ud-close" type="button" class="text-muted hover:text-brand-500 dark:hover:text-accent" aria-label="{{ i18n "close_aria" }}">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="accent-rule my-3"></div>
+
+            <form id="upload-dataset-form" class="space-y-4 mt-4">
+                <div>
+                    <label for="ud-name" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_name" }}</label>
+                    <input type="text" id="ud-name" name="name" required maxlength="80" class="input-field">
+                </div>
+                <div>
+                    <label for="ud-description" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_description" }}</label>
+                    <textarea id="ud-description" name="description" rows="3" class="input-field"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="ud-format" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_format" }}</label>
+                        <input type="text" id="ud-format" name="format" maxlength="20" placeholder="parquet" class="input-field">
+                    </div>
+                    <div>
+                        <label for="ud-volume" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_volume" }}</label>
+                        <input type="text" id="ud-volume" name="volume" maxlength="20" placeholder="1.2 GB" class="input-field">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" id="ud-cancel" class="btn-ghost text-sm">{{ i18n "btn_cancel" }}</button>
+                    <button type="submit" class="btn-primary text-sm">{{ i18n "btn_upload" }}</button>
+                </div>
+            </form>
+
+            <div id="ud-message" class="hidden mt-4 p-3 rounded-md text-sm"></div>
+        </div>
+    </div>
+</div>
+
 <script>
 const userEmail = localStorage.getItem('userEmail');
 if (!userEmail) window.location.href = LANG_PREFIX;
+
+(function () {
+    const grid = document.getElementById('dataset-grid');
+    const countEl = document.getElementById('dataset-count');
+
+    // Datasets uploaded in-browser are stored per project (this is a
+    // client-side prototype — there is no backend to persist them to yet).
+    const projectId = {{ $projectId }};
+    const uid = localStorage.getItem('userId') || 'anon';
+    const LS_KEY = 'datasets_' + uid + '_' + projectId;
+
+    const BASE_URL = {{ printf "/user/%s/project/%s/datasets/" $userId $projectId | relLangURL }};
+    const DRAFT_LABEL = {{ i18n "status_draft" }};
+    const KICKER_DATASET = {{ i18n "kicker_dataset" }};
+
+    // Pre-rendered plural label, one per possible new total. The build only
+    // knows the server-side count, so we recompute the phrase from these forms.
+    function countLabel(n) {
+        return n === 1 ? {{ i18n "datasets_count" 1 }} : {{ i18n "datasets_count" 2 }}.replace(/\b2\b/, n);
+    }
+
+    function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str == null ? '' : String(str);
+        return d.innerHTML;
+    }
+
+    function slugify(str) {
+        return (str || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+
+    function loadDatasets() {
+        try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+        catch (e) { return []; }
+    }
+
+    function datasetCardHtml(ds) {
+        const desc = ds.description
+            ? `<p class="text-sm text-muted mb-4 line-clamp-3">${escapeHtml(ds.description)}</p>` : '';
+        const pills = [];
+        if (ds.format) pills.push(`<span class="pill pill-brand">${escapeHtml(ds.format)}</span>`);
+        if (ds.volume) pills.push(`<span class="pill pill-brand">${escapeHtml(ds.volume)}</span>`);
+        pills.push(`<span class="pill pill-brand">${escapeHtml(DRAFT_LABEL)}</span>`);
+        return `
+            <a href="${escapeHtml(BASE_URL + ds.id)}" class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
+                <div class="flex items-start justify-between mb-3 gap-3">
+                    <div class="min-w-0">
+                        <div class="kicker">${escapeHtml(KICKER_DATASET)}</div>
+                        <h3 class="text-lg mt-1 group-hover:text-brand-500 dark:group-hover:text-accent transition-colors truncate">${escapeHtml(ds.name)}</h3>
+                    </div>
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent flex-shrink-0">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                    </span>
+                </div>
+                ${desc}
+                <div class="flex flex-wrap gap-2 mb-3">${pills.join('')}</div>
+                <div class="flex items-center justify-between text-xs text-muted pt-3 border-t border-[var(--color-surface-border)] dark:border-white/10">
+                    <span></span>
+                    <span>{{ i18n "meta_updated" }} ${escapeHtml(ds.last_updated || '')}</span>
+                </div>
+            </a>`;
+    }
+
+    function refreshCount() {
+        if (countEl) countEl.textContent = countLabel(grid.querySelectorAll('a').length);
+    }
+
+    function addCard(ds, prepend) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = datasetCardHtml(ds).trim();
+        const card = tmp.firstElementChild;
+        if (prepend && grid.firstElementChild) grid.insertBefore(card, grid.firstElementChild);
+        else grid.appendChild(card);
+        refreshCount();
+    }
+
+    // Render any previously uploaded datasets, then set the initial count.
+    loadDatasets().forEach(ds => addCard(ds, false));
+    refreshCount();
+
+    // ── Upload-dataset modal ──────────────────────────────────────────────
+    const modal = document.getElementById('upload-dataset-modal');
+    const form = document.getElementById('upload-dataset-form');
+    const message = document.getElementById('ud-message');
+    const nameInput = document.getElementById('ud-name');
+
+    function open() {
+        modal.classList.remove('hidden');
+        setTimeout(() => nameInput?.focus(), 30);
+    }
+    function close() {
+        modal.classList.add('hidden');
+        form.reset();
+        message.classList.add('hidden');
+    }
+
+    document.getElementById('upload-dataset-button')?.addEventListener('click', open);
+    document.getElementById('ud-close')?.addEventListener('click', close);
+    document.getElementById('ud-cancel')?.addEventListener('click', close);
+    modal?.addEventListener('click', e => { if (e.target === modal) close(); });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) close();
+    });
+
+    form?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const name = nameInput.value.trim();
+        if (!name) {
+            message.textContent = {{ i18n "dataset_name_required" }};
+            message.className = 'mt-4 p-3 rounded-md text-sm bg-red-50 text-red-700 border border-red-100 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900';
+            message.classList.remove('hidden');
+            return;
+        }
+        const base = slugify(name) || 'dataset';
+        const ds = {
+            id: base + '-' + Math.abs(Date.now()).toString(36).slice(-4),
+            name: name,
+            description: document.getElementById('ud-description').value.trim(),
+            format: document.getElementById('ud-format').value.trim(),
+            volume: document.getElementById('ud-volume').value.trim(),
+            last_updated: new Date().toISOString().slice(0, 10)
+        };
+        const datasets = loadDatasets();
+        datasets.push(ds);
+        try { localStorage.setItem(LS_KEY, JSON.stringify(datasets)); } catch (err) {}
+        addCard(ds, true);
+        close();
+    });
+})();
 </script>
 {{ end }}
