@@ -86,6 +86,15 @@ empty_workspace = "Empty workspace"
 no_projects_title = "No projects yet"
 no_projects_desc = "You are not a member of any project. Ask an administrator to add you to one."
 
+# Create project
+btn_create_project = "Create project"
+create_project_kicker = "New"
+create_project_title = "Create a project"
+btn_create = "Create"
+btn_cancel = "Cancel"
+project_draft = "draft"
+project_name_required = "Please enter a project name."
+
 # Project overview
 back_to_projects = "Back to projects"
 project_settings = "Project settings"

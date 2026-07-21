@@ -14,9 +14,15 @@
         <p class="text-muted">{{ i18n "workspace_pick" }}</p>
     </div>
 
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl">{{ i18n "your_projects" }}</h2>
-        <span class="text-sm text-muted" id="project-count"></span>
+    <div class="flex items-center justify-between gap-4 mb-6">
+        <div class="flex items-baseline gap-3">
+            <h2 class="text-2xl">{{ i18n "your_projects" }}</h2>
+            <span class="text-sm text-muted" id="project-count"></span>
+        </div>
+        <button id="create-project-button" type="button" class="btn-primary text-sm whitespace-nowrap">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></svg>
+            {{ i18n "btn_create_project" }}
+        </button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="project-grid">
@@ -29,7 +35,7 @@
                 {{ $appCount := len $project.apps }}
                 {{ $automationCount := len $project.automations }}
                 {{ $memberCount := len $project.members }}
-                <a href="{{ printf "/user/%s/project/%s" $userId $projectId | relLangURL }}" class="surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
+                <a href="{{ printf "/user/%s/project/%s" $userId $projectId | relLangURL }}" class="project-card surface-card p-6 hover:border-brand-300 dark:hover:border-accent/60 transition-colors group block">
                     <div class="flex items-start justify-between mb-3">
                         <div>
                             <div class="kicker">{{ i18n "kicker_project" }}</div>
@@ -61,13 +67,50 @@
             {{ end }}
         {{ end }}
 
-        {{ if not $hasProject }}
-        <div class="md:col-span-2 lg:col-span-3 surface-card p-10 text-center">
+        <div id="empty-workspace" class="md:col-span-2 lg:col-span-3 surface-card p-10 text-center {{ if $hasProject }}hidden{{ end }}">
             <div class="kicker mb-2">{{ i18n "empty_workspace" }}</div>
             <h3 class="text-xl mb-2">{{ i18n "no_projects_title" }}</h3>
             <p class="text-muted">{{ i18n "no_projects_desc" }}</p>
         </div>
-        {{ end }}
+    </div>
+</div>
+
+<!-- Create project modal -->
+<div id="create-project-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-[#0f172a]/60 backdrop-blur-sm">
+    <div class="relative top-20 mx-auto w-full max-w-lg px-4">
+        <div class="surface-card p-6">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <div class="kicker">{{ i18n "create_project_kicker" }}</div>
+                    <h3 class="text-2xl mt-1">{{ i18n "create_project_title" }}</h3>
+                </div>
+                <button id="cp-close" type="button" class="text-muted hover:text-brand-500 dark:hover:text-accent" aria-label="{{ i18n "close_aria" }}">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="accent-rule my-3"></div>
+
+            <form id="create-project-form" class="space-y-4 mt-4">
+                <div>
+                    <label for="cp-name" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_name" }}</label>
+                    <input type="text" id="cp-name" name="name" required maxlength="80" class="input-field">
+                </div>
+                <div>
+                    <label for="cp-short" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_short_description" }}</label>
+                    <input type="text" id="cp-short" name="short_description" maxlength="140" class="input-field">
+                </div>
+                <div>
+                    <label for="cp-description" class="block text-sm font-medium text-ink-600 dark:text-slate-300 mb-1">{{ i18n "label_description" }}</label>
+                    <textarea id="cp-description" name="description" rows="3" class="input-field"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" id="cp-cancel" class="btn-ghost text-sm">{{ i18n "btn_cancel" }}</button>
+                    <button type="submit" class="btn-primary text-sm">{{ i18n "btn_create" }}</button>
+                </div>
+            </form>
+
+            <div id="cp-message" class="hidden mt-4 p-3 rounded-md text-sm"></div>
+        </div>
     </div>
 </div>
 
@@ -84,8 +127,140 @@
     if (!userEmail) window.location.href = LANG_PREFIX;
 
     const grid = document.getElementById('project-grid');
-    const count = grid?.querySelectorAll('a').length || 0;
     const countEl = document.getElementById('project-count');
-    if (countEl) countEl.textContent = count + ' ' + {{ i18n "active" }};
+    const emptyState = document.getElementById('empty-workspace');
+
+    // Projects created in-browser are stored per user (this is a client-side
+    // prototype — there is no backend to persist them to yet).
+    const uid = localStorage.getItem('userId') || 'anon';
+    const LS_KEY = 'projects_' + uid;
+
+    // Pre-rendered, translated labels for a brand-new (empty) project card.
+    const ZERO_LABELS = [
+        {{ i18n "datasets_count" 0 }},
+        {{ i18n "reports_count" 0 }},
+        {{ i18n "automations_count" 0 }},
+        {{ i18n "apps_count" 0 }}
+    ];
+    const ONE_MEMBER = {{ i18n "members_count" 1 }};
+    const DRAFT_LABEL = {{ i18n "project_draft" }};
+    const ACTIVE_LABEL = {{ i18n "active" }};
+    const KICKER_PROJECT = {{ i18n "kicker_project" }};
+
+    function initials(name) {
+        const parts = (name || '').trim().split(/\s+/);
+        const raw = parts.length >= 2 ? parts[0][0] + parts[parts.length - 1][0] : (name || '?').slice(0, 2);
+        return raw.toUpperCase();
+    }
+
+    function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str == null ? '' : String(str);
+        return d.innerHTML;
+    }
+
+    function loadProjects() {
+        try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+        catch (e) { return []; }
+    }
+
+    function projectCardHtml(project) {
+        const memberInitials = initials(userFullName || uid);
+        const pills = ZERO_LABELS.map(l => `<span class="pill pill-brand">${escapeHtml(l)}</span>`).join('');
+        return `
+            <div class="project-card surface-card p-6 group block" data-project-id="${escapeHtml(project.id)}">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <div class="kicker flex items-center gap-2">${escapeHtml(KICKER_PROJECT)}
+                            <span class="pill pill-brand normal-case tracking-normal">${escapeHtml(DRAFT_LABEL)}</span>
+                        </div>
+                        <h3 class="text-xl mt-1">${escapeHtml(project.name)}</h3>
+                    </div>
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/5 text-brand-500 dark:text-accent">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+                    </span>
+                </div>
+                <p class="text-sm text-muted mb-4 line-clamp-2">${escapeHtml(project.short_description || '')}</p>
+                <div class="flex flex-wrap gap-2 mb-4">${pills}</div>
+                <div class="flex items-center justify-between pt-3 border-t border-[var(--color-surface-border)] dark:border-white/10">
+                    <div class="flex -space-x-2">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 dark:bg-white/10 text-brand-700 dark:text-accent text-xs font-semibold ring-2 ring-white dark:ring-[#0f172a]" title="${escapeHtml(userFullName || uid)}">${escapeHtml(memberInitials)}</span>
+                    </div>
+                    <span class="text-xs text-muted">${escapeHtml(ONE_MEMBER)}</span>
+                </div>
+            </div>`;
+    }
+
+    function refreshCount() {
+        const n = grid.querySelectorAll('.project-card').length;
+        if (countEl) countEl.textContent = n + ' ' + ACTIVE_LABEL;
+        if (emptyState) emptyState.classList.toggle('hidden', n > 0);
+    }
+
+    function addCard(project, prepend) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = projectCardHtml(project).trim();
+        const card = tmp.firstElementChild;
+        if (prepend && grid.firstElementChild) grid.insertBefore(card, grid.firstElementChild);
+        else grid.insertBefore(card, emptyState);
+        refreshCount();
+    }
+
+    // Render any previously created projects, then set the initial count.
+    loadProjects().forEach(p => addCard(p, false));
+    refreshCount();
+
+    // ── Create-project modal ──────────────────────────────────────────────
+    const cpModal = document.getElementById('create-project-modal');
+    const cpForm = document.getElementById('create-project-form');
+    const cpMessage = document.getElementById('cp-message');
+    const cpNameInput = document.getElementById('cp-name');
+
+    function cpOpen() {
+        cpModal.classList.remove('hidden');
+        setTimeout(() => cpNameInput?.focus(), 30);
+    }
+    function cpClose() {
+        cpModal.classList.add('hidden');
+        cpForm.reset();
+        cpMessage.classList.add('hidden');
+    }
+
+    function slugify(str) {
+        return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+
+    document.getElementById('create-project-button')?.addEventListener('click', cpOpen);
+    document.getElementById('cp-close')?.addEventListener('click', cpClose);
+    document.getElementById('cp-cancel')?.addEventListener('click', cpClose);
+    cpModal?.addEventListener('click', e => { if (e.target === cpModal) cpClose(); });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !cpModal.classList.contains('hidden')) cpClose();
+    });
+
+    cpForm?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const name = cpNameInput.value.trim();
+        if (!name) {
+            cpMessage.textContent = {{ i18n "project_name_required" }};
+            cpMessage.className = 'mt-4 p-3 rounded-md text-sm bg-red-50 text-red-700 border border-red-100 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900';
+            cpMessage.classList.remove('hidden');
+            return;
+        }
+        const base = slugify(name) || 'project';
+        const project = {
+            id: base + '-' + Math.abs(Date.now()).toString(36).slice(-4),
+            name: name,
+            short_description: document.getElementById('cp-short').value.trim(),
+            description: document.getElementById('cp-description').value.trim(),
+            created: new Date().toISOString().slice(0, 10)
+        };
+        const projects = loadProjects();
+        projects.push(project);
+        try { localStorage.setItem(LS_KEY, JSON.stringify(projects)); } catch (err) {}
+        addCard(project, true);
+        cpClose();
+    });
 </script>
 {{ end }}
