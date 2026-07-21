@@ -16,10 +16,6 @@
             {{ i18n "back_to_projects" }}
         </a>
         <div class="flex items-center gap-3">
-            <a href="{{ printf "/user/%s/project/%s/knowledge-hub/" $userId $projectId | relLangURL }}" class="btn-primary inline-flex items-center gap-2 text-sm">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="5" cy="6" r="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="6" r="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="18" r="2" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.7 7.3l4.3 9.4M17.3 7.3l-4.3 9.4M7 6h10"/></svg>
-                {{ i18n "knowledge_hub" }}
-            </a>
             {{ if $canManage }}
             <a href="{{ printf "/user/%s/project/%s/settings" $userId $projectId | relLangURL }}" class="btn-ghost inline-flex items-center gap-2 text-sm">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0c.22.86 1.144 1.353 1.992 1.063a1.724 1.724 0 012.353 2.353c-.29.848.203 1.772 1.063 1.992a1.724 1.724 0 010 3.35c-.86.22-1.353 1.144-1.063 1.992a1.724 1.724 0 01-2.353 2.353c-.848-.29-1.772.203-1.992 1.063a1.724 1.724 0 01-3.35 0c-.22-.86-1.144-1.353-1.992-1.063a1.724 1.724 0 01-2.353-2.353c.29-.848-.203-1.772-1.063-1.992a1.724 1.724 0 010-3.35c.86-.22 1.353-1.144 1.063-1.992a1.724 1.724 0 012.353-2.353c.848.29 1.772-.203 1.992-1.063z"/><circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
