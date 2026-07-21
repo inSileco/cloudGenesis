@@ -143,6 +143,14 @@ automations:
     name: "Telemetry Ingest"
     description: "Pulls the latest GPS fixes from satellite collar providers, deduplicates and writes nightly track segments to the project store."
     schedule: "Daily · 04:30 UTC"
+    inputs:
+      - name: "Argos & Movebank fixes"
+        type: "API"
+        description: "Latest GPS fixes from satellite collar providers"
+    outputs:
+      - name: "Telemetry Tracks"
+        type: "GeoJSON"
+        description: "Nightly per-individual track segments appended to the dataset"
     avg_duration: "6m 41s"
     runs_count: 198
     steps:
@@ -180,6 +188,17 @@ automations:
     name: "Habitat Suitability Model"
     description: "Runs the ensemble species-distribution model across the habitat rasters, producing suitability layers per species and climate scenario."
     schedule: "Monthly · 1st of month, 03:00 UTC"
+    inputs:
+      - name: "Habitat rasters"
+        type: "Raster"
+        description: "Environmental predictor layers for the study area"
+      - name: "Occurrence records"
+        type: "Dataset"
+        description: "Species presence points used to fit the models"
+    outputs:
+      - name: "Suitability layers"
+        type: "Raster"
+        description: "Per-species suitability rasters for three climate scenarios"
     avg_duration: "42m 11s"
     runs_count: 9
     steps:

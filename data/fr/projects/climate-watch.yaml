@@ -127,6 +127,14 @@ automations:
     name: "Ingestion satellitaire"
     description: "Interroge le fournisseur satellitaire pour de nouvelles scènes, télécharge les tuiles correspondantes et les prépare pour l'archive d'imagerie."
     schedule: "Toutes les 6 h"
+    inputs:
+      - name: "Catalogue de scènes du fournisseur"
+        type: "API"
+        description: "Nouvelles scènes correspondant à la zone d'intérêt du bassin"
+    outputs:
+      - name: "Archive d'imagerie satellitaire"
+        type: "GeoTIFF"
+        description: "Tuiles préparées écrites dans le compartiment de l'archive d'imagerie"
     avg_duration: "18m 04s"
     runs_count: 612
     steps:
@@ -158,6 +166,14 @@ automations:
     name: "Contrôle qualité des stations météo"
     description: "Exécute la batterie de contrôle qualité sur les relevés des stations météo, signale les valeurs aberrantes et détecte la dérive des capteurs."
     schedule: "Quotidien · 05:00 UTC"
+    inputs:
+      - name: "Données des stations météo"
+        type: "Table"
+        description: "Relevés bruts des stations des dernières 24 h"
+    outputs:
+      - name: "Indicateurs de contrôle qualité"
+        type: "Table"
+        description: "Indicateurs d'aberrations et de dérive réécrits dans la table des relevés"
     avg_duration: "3m 47s"
     runs_count: 124
     steps:

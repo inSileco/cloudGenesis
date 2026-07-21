@@ -143,6 +143,14 @@ automations:
     name: "Ingestion de télémétrie"
     description: "Récupère les dernières localisations GPS auprès des fournisseurs de colliers satellitaires, les déduplique et écrit chaque nuit les segments de trajectoire dans le dépôt du projet."
     schedule: "Quotidien · 04:30 UTC"
+    inputs:
+      - name: "Localisations Argos et Movebank"
+        type: "API"
+        description: "Dernières localisations GPS des fournisseurs de colliers satellitaires"
+    outputs:
+      - name: "Trajectoires de télémétrie"
+        type: "GeoJSON"
+        description: "Segments de trajectoire nocturnes par individu ajoutés au jeu de données"
     avg_duration: "6m 41s"
     runs_count: 198
     steps:
@@ -180,6 +188,17 @@ automations:
     name: "Modèle de qualité de l'habitat"
     description: "Exécute le modèle d'ensemble de distribution d'espèces sur les rasters d'habitat, produisant des couches de qualité par espèce et par scénario climatique."
     schedule: "Mensuel · 1er du mois, 03:00 UTC"
+    inputs:
+      - name: "Rasters d'habitat"
+        type: "Raster"
+        description: "Couches de prédicteurs environnementaux pour la zone d'étude"
+      - name: "Enregistrements d'occurrence"
+        type: "Jeu de données"
+        description: "Points de présence des espèces utilisés pour ajuster les modèles"
+    outputs:
+      - name: "Couches de qualité"
+        type: "Raster"
+        description: "Rasters de qualité par espèce pour trois scénarios climatiques"
     avg_duration: "42m 11s"
     runs_count: 9
     steps:

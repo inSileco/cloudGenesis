@@ -127,6 +127,14 @@ automations:
     name: "Satellite Ingest"
     description: "Polls the satellite provider for new scenes, downloads matching tiles and stages them for the imagery archive."
     schedule: "Every 6h"
+    inputs:
+      - name: "Provider scene catalogue"
+        type: "API"
+        description: "New scenes matching the basin area of interest"
+    outputs:
+      - name: "Satellite Imagery Archive"
+        type: "GeoTIFF"
+        description: "Staged tiles written to the imagery archive bucket"
     avg_duration: "18m 04s"
     runs_count: 612
     steps:
@@ -158,6 +166,14 @@ automations:
     name: "Weather Station QC"
     description: "Runs the quality-control battery on weather-station readings, flags outliers and detects sensor drift."
     schedule: "Daily · 05:00 UTC"
+    inputs:
+      - name: "Weather Station Data"
+        type: "Table"
+        description: "Past 24h of raw station readings"
+    outputs:
+      - name: "QC flags"
+        type: "Table"
+        description: "Outlier and drift flags written back to the readings table"
     avg_duration: "3m 47s"
     runs_count: 124
     steps:

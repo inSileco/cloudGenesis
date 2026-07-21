@@ -179,6 +179,20 @@ automations:
     name: "Biodiversity ETL"
     description: "Ingests raw census CSVs, resolves taxa against GBIF, computes Shannon and Simpson diversity indices, and writes parquet outputs back to the project dataset store."
     schedule: "Weekly · Sunday 02:00 UTC"
+    inputs:
+      - name: "Ecological Survey Data"
+        type: "CSV"
+        description: "Raw plot-level census exports from the field-collector bucket"
+      - name: "GBIF backbone"
+        type: "API"
+        description: "Taxonomic reference used to resolve taxon keys"
+    outputs:
+      - name: "Biodiversity Census 2024"
+        type: "Parquet"
+        description: "Cleaned census with Shannon and Simpson diversity indices"
+      - name: "Plot aggregations"
+        type: "Dataset"
+        description: "Plot-level diversity summaries written to the project store"
     avg_duration: "10m 32s"
     runs_count: 47
     steps:
@@ -216,6 +230,14 @@ automations:
     name: "Species Map Tiles"
     description: "Re-generates vector tile sets from the latest species distribution maps and pushes them to the public CDN."
     schedule: "On demand"
+    inputs:
+      - name: "Species Distribution Maps"
+        type: "GeoJSON"
+        description: "Latest per-species presence polygons"
+    outputs:
+      - name: "Species vector tiles"
+        type: "MVT"
+        description: "Zoom 4–14 tile set published to the public CDN"
     avg_duration: "4m 18s"
     runs_count: 12
     steps:

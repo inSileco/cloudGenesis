@@ -179,6 +179,20 @@ automations:
     name: "ETL de biodiversité"
     description: "Ingère les CSV bruts de recensement, résout les taxons avec GBIF, calcule les indices de diversité de Shannon et de Simpson, et réécrit les sorties parquet dans le dépôt de jeux de données du projet."
     schedule: "Hebdomadaire · dimanche 02:00 UTC"
+    inputs:
+      - name: "Données de relevés écologiques"
+        type: "CSV"
+        description: "Exportations brutes de recensement par parcelle du compartiment de collecte sur le terrain"
+      - name: "Référentiel GBIF"
+        type: "API"
+        description: "Référence taxonomique utilisée pour résoudre les clés de taxons"
+    outputs:
+      - name: "Recensement de biodiversité 2024"
+        type: "Parquet"
+        description: "Recensement nettoyé avec les indices de diversité de Shannon et de Simpson"
+      - name: "Agrégations par parcelle"
+        type: "Jeu de données"
+        description: "Résumés de diversité par parcelle écrits dans le dépôt du projet"
     avg_duration: "10m 32s"
     runs_count: 47
     steps:
@@ -216,6 +230,14 @@ automations:
     name: "Tuiles de cartes d'espèces"
     description: "Régénère les ensembles de tuiles vectorielles à partir des plus récentes cartes de distribution des espèces et les pousse vers le CDN public."
     schedule: "Sur demande"
+    inputs:
+      - name: "Cartes de distribution des espèces"
+        type: "GeoJSON"
+        description: "Plus récents polygones de présence par espèce"
+    outputs:
+      - name: "Tuiles vectorielles d'espèces"
+        type: "MVT"
+        description: "Ensemble de tuiles aux niveaux de zoom 4–14 publié sur le CDN public"
     avg_duration: "4m 18s"
     runs_count: 12
     steps:
